@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f172a">
+<title>Lavandería</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#f1f5f9;font-size:16px;line-height:1.5}
+:root{
+  --bg:#0f172a;--surface:#1e293b;--surface2:#273449;--border:#334155;
+  --accent:#22d3ee;--green:#4ade80;--orange:#fb923c;--red:#f87171;
+  --text:#f1f5f9;--muted:#94a3b8;--radius:14px;
+  --sb:env(safe-area-inset-bottom,0px);
+}
+#app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-brand{display:flex;align-items:center;gap:10px}
+.topbar-logo{font-size:24px}
+.topbar-title{font-size:17px;font-weight:700}
+
+/* SCREENS */
+.screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(76px + var(--sb));display:none}
+.screen.active{display:block}
+/* ingreso-cliente también es una screen */
+#screen-ingreso-cliente{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(76px + var(--sb));display:none}
+#screen-ingreso-cliente.active{display:block}
+.screens{flex:1;overflow:hidden;position:relative}
+
+/* BOTTOM NAV */
+.bottomnav{background:var(--surface);border-top:1px solid var(--border);display:flex;padding-bottom:var(--sb);flex-shrink:0}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;position:relative}
+.nav-btn .ni{font-size:22px;line-height:1}
+.nav-btn.active{color:var(--accent)}
+.nbadge{position:absolute;top:5px;right:calc(50% - 20px);background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 5px;min-width:16px;text-align:center;display:none}
+
+/* HOME */
+#screen-home{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px 24px;padding-bottom:calc(32px + var(--sb))}
+.home-logo{font-size:56px;margin-bottom:8px}
+.home-title{font-size:24px;font-weight:800;margin-bottom:32px;text-align:center}
+.home-btn{width:100%;padding:28px 20px;border-radius:18px;border:none;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
+.home-btn:active{transform:scale(0.97);opacity:0.85}
+.home-btn-icon{font-size:40px}
+.home-btn-label{font-size:20px;font-weight:700}
+.home-btn-sub{font-size:14px;opacity:0.8}
+.home-btn.ingreso{background:linear-gradient(135deg,#0891b2,#22d3ee);color:#0f172a}
+.home-btn.retiro{background:linear-gradient(135deg,#15803d,#4ade80);color:#0f172a}
+
+/* TICKET */
+.ticket-wrap{max-width:520px;margin:0 auto}
+.ticket-header{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;padding:14px 16px;border-bottom:2px dashed var(--border)}
+.ticket-header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ticket-num{font-size:13px;color:var(--accent);font-weight:700}
+.ticket-fecha{font-size:13px;color:var(--muted)}
+.cli-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.cli-label{font-size:12px;color:var(--muted);min-width:32px}
+.cli-input{flex:1;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:15px;padding:4px 2px;outline:none}
+.cli-input:focus{border-bottom-color:var(--accent)}
+.cli-input::placeholder{color:var(--muted);font-size:14px}
+.ac-wrap{position:relative;flex:1}
+.ac-list{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:0 0 10px 10px;z-index:100;max-height:180px;overflow-y:auto;display:none}
+.ac-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px}
+.ac-item:last-child{border-bottom:none}
+.ac-name{font-weight:600}
+.ac-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.deuda-pill{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);color:var(--red);font-size:12px;padding:2px 8px;border-radius:10px;white-space:nowrap}
+
+/* GRUPOS */
+.grupos-wrap{background:var(--surface);border:1px solid var(--border);border-top:none;padding:0}
+.grupo{border-bottom:1px solid var(--border)}
+.grupo:last-child{border-bottom:none}
+.grupo-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;background:var(--surface2)}
+.grupo-header-left{display:flex;align-items:center;gap:10px}
+.grupo-icon{font-size:18px}
+.grupo-nombre{font-size:14px;font-weight:600}
+.grupo-count{font-size:11px;color:var(--muted);background:var(--bg);padding:2px 7px;border-radius:10px}
+.grupo-arrow{font-size:12px;color:var(--muted);transition:transform 0.2s}
+.grupo-arrow.open{transform:rotate(180deg)}
+.grupo-body{display:none;padding:8px 16px 12px}
+.grupo-body.open{display:block}
+.srv-fila{display:grid;grid-template-columns:44px 1fr 90px 36px;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.srv-fila:last-child{border-bottom:none}
+.srv-nombre{font-size:14px;color:var(--text)}
+.srv-precio-unit{font-size:12px;color:var(--muted);margin-top:2px}
+.qty-select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:15px;font-weight:600;padding:6px 4px;text-align:center;outline:none;width:100%;-webkit-appearance:none;appearance:none;cursor:pointer}
+.qty-select.activo{border-color:var(--accent);background:rgba(34,211,238,0.1);color:var(--accent)}
+.srv-subtotal{font-size:14px;font-weight:600;text-align:right;color:var(--muted)}
+.srv-subtotal.activo{color:var(--text)}
+.srv-del{width:28px;height:28px;border-radius:6px;background:none;border:none;color:var(--border);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.srv-del.activo{color:var(--red);background:rgba(248,113,113,0.1)}
+
+/* TOTALES */
+.ticket-totales{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px 16px;border-radius:0 0 var(--radius) var(--radius)}
+.tot-row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:6px}
+.tot-row.total{font-size:22px;font-weight:900;color:var(--text);margin-bottom:14px;padding-top:10px;border-top:2px dashed var(--border)}
+
+/* PAGO COMBINADO */
+.pago-combinado{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+.pago-combinado-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.pago-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pago-row:last-child{margin-bottom:0}
+.pago-icon-label{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;min-width:130px}
+.pago-monto-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:16px;font-weight:600;color:var(--text);outline:none;text-align:right}
+.pago-monto-input:focus{border-color:var(--accent)}
+.pago-monto-input::placeholder{color:var(--muted);font-weight:400}
+.pago-resumen{background:var(--bg);border-radius:8px;padding:10px 12px;margin-top:10px;display:none}
+.pago-resumen-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+.pago-resumen-row.saldo{color:var(--orange);font-weight:600}
+.pago-resumen-row.vuelto{color:var(--green);font-weight:600}
+.pago-resumen-row.ok{color:var(--green);font-weight:600}
+
+/* CONFIRMACION */
+.confirm-wrap{text-align:center;padding:24px 0 16px}
+.confirm-icon{font-size:56px;margin-bottom:10px}
+.confirm-ticket-num{font-size:52px;font-weight:900;color:var(--accent);letter-spacing:-2px}
+.confirm-sub{font-size:15px;color:var(--muted);margin-top:4px}
+.wa-box{background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);border-radius:12px;padding:16px;margin:16px 0}
+.wa-num{font-size:22px;font-weight:700;color:var(--accent);margin-top:6px}
+.wa-hint{font-size:13px;color:var(--muted);margin-top:6px}
+
+/* RETIRO */
+.retiro-buscador{margin-bottom:16px}
+.retiro-fallback{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:16px;display:none}
+.retiro-fallback-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.retiro-fallback-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+
+/* TICKET FISICO — tipos */
+.tipo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.tipo-btn{padding:12px 8px;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s}
+.tipo-btn.sel{border-color:var(--accent);background:rgba(34,211,238,0.1);color:var(--accent)}
+
+/* PEDIDOS */
+.filtros{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+.filtro{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:13px;white-space:nowrap;cursor:pointer;flex-shrink:0}
+.filtro.active{background:rgba(34,211,238,0.1);border-color:var(--accent);color:var(--accent)}
+.pedido-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;cursor:pointer}
+.pedido-card:active{opacity:0.75}
+.pc-recibido{border-left-color:var(--accent)}
+.pc-proceso{border-left-color:var(--orange)}
+.pc-listo{border-left-color:var(--green)}
+.pc-entregado{border-left-color:var(--border);opacity:0.55}
+.pc-alerta{border-left-color:var(--red)}
+.pc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.pc-ticket{font-weight:700;font-size:15px}
+.pc-cliente{font-size:14px;color:var(--muted);margin-bottom:4px}
+.pc-bottom{display:flex;justify-content:space-between;align-items:flex-end}
+.pc-fecha{font-size:12px;color:var(--muted)}
+.pc-monto{font-weight:700;font-size:15px}
+.pc-saldo{font-size:12px;color:var(--orange)}
+
+/* CAJA */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.kpi-label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.kpi-val{font-size:22px;font-weight:700}
+.kv-green{color:var(--green)}
+.kv-accent{color:var(--accent)}
+.kv-orange{color:var(--orange)}
+
+/* COMUNES */
+.section-title{font-size:20px;font-weight:700;margin-bottom:16px}
+.input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 14px;font-size:16px;color:var(--text);outline:none;transition:border-color 0.15s}
+.input:focus{border-color:var(--accent)}
+.input::placeholder{color:var(--muted)}
+select.input{-webkit-appearance:none;appearance:none}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.b-blue{background:rgba(34,211,238,0.15);color:var(--accent)}
+.b-orange{background:rgba(251,146,60,0.15);color:var(--orange)}
+.b-green{background:rgba(74,222,128,0.15);color:var(--green)}
+.b-red{background:rgba(248,113,113,0.15);color:var(--red)}
+.b-gray{background:rgba(148,163,184,0.1);color:var(--muted)}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.row{display:flex;gap:10px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.alert{padding:12px 14px;border-radius:10px;font-size:14px;margin-bottom:14px}
+.alert-warn{background:rgba(251,146,60,0.12);border:1px solid rgba(251,146,60,0.3);color:var(--orange)}
+.alert-ok{background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:var(--green)}
+.alert-info{background:rgba(34,211,238,0.12);border:1px solid rgba(34,211,238,0.3);color:var(--accent)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 20px;border-radius:12px;font-size:16px;font-weight:600;border:none;cursor:pointer;width:100%;transition:opacity 0.15s,transform 0.1s}
+.btn:active{transform:scale(0.97);opacity:0.85}
+.btn-primary{background:var(--accent);color:#0f172a}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-green{background:var(--green);color:#0f172a}
+.btn-orange{background:var(--orange);color:#0f172a}
+.btn-sm{padding:10px 16px;font-size:14px;border-radius:10px;width:auto}
+.input-group{margin-bottom:14px}
+.input-label{font-size:13px;color:var(--muted);margin-bottom:6px;display:block}
+.btn-guardar{width:100%;padding:16px;border-radius:12px;border:none;background:var(--accent);color:#0f172a;font-size:17px;font-weight:800;cursor:pointer;transition:opacity 0.15s,transform 0.1s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-guardar:active{transform:scale(0.97);opacity:0.85}
+.btn-guardar:disabled{opacity:0.4;cursor:not-allowed}
+
+/* DRAWER */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;display:none;backdrop-filter:blur(3px)}
+.overlay.open{display:block}
+.drawer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:20px 20px 0 0;padding:20px 16px calc(24px + var(--sb));z-index:201;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1)}
+.drawer.open{transform:translateY(0)}
+.drawer-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px}
+
+/* LOADING / EMPTY / TOAST */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:12px;color:var(--muted)}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:15px}
+.empty-icon{font-size:40px;margin-bottom:10px}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:500;z-index:999;transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(74,222,128,0.4);color:var(--green)}
+.toast.err{border-color:rgba(248,113,113,0.4);color:var(--red)}
+/* CAJA */
+.caja-seccion{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
+.caja-seccion-header{background:var(--surface2);padding:12px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.caja-seccion-body{padding:14px 16px}
+.conteo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.conteo-item{background:var(--surface2);border-radius:10px;padding:12px;text-align:center}
+.conteo-num{font-size:28px;font-weight:800;color:var(--accent);line-height:1}
+.conteo-label{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.5px}
+.mov-table{width:100%;font-size:13px;border-collapse:collapse}
+.mov-table th{padding:8px 10px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);border-bottom:1px solid var(--border)}
+.mov-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+.mov-table tr:last-child td{border-bottom:none}
+.mov-table .ef{color:var(--green)}
+.mov-table .tar{color:var(--accent)}
+.egreso-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px}
+.egreso-row:last-child{border-bottom:none}
+.egreso-desc{color:var(--muted);flex:1}
+.egreso-monto{color:var(--red);font-weight:600;margin-left:12px}
+.cierre-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px}
+.cierre-row:last-child{border-bottom:none}
+.cierre-label{color:var(--muted)}
+.cierre-val{font-weight:600}
+.cierre-row.subtotal{font-size:16px;padding-top:14px;margin-top:4px;border-top:2px dashed var(--border);border-bottom:none}
+.cierre-row.subtotal .cierre-label{color:var(--text);font-weight:700}
+.cierre-row.subtotal .cierre-val{color:var(--accent);font-size:20px;font-weight:800}
+.cierre-row.negativo .cierre-val{color:var(--red)}
+.fondo-input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:15px;font-weight:600;color:var(--accent);outline:none;width:120px;text-align:right}
+.fondo-input:focus{border-color:var(--accent)}
+.btn-egreso{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px dashed var(--border);background:none;color:var(--muted);font-size:13px;cursor:pointer;width:100%;justify-content:center;margin-top:10px}
+.btn-egreso:active{background:var(--surface2)}
+.egreso-form{background:var(--surface2);border-radius:10px;padding:12px;margin-top:10px;display:none}
+.btn-cerrar-caja{width:100%;padding:16px;border-radius:12px;border:none;background:var(--orange);color:#0f172a;font-size:17px;font-weight:800;cursor:pointer;margin-top:4px}
+.btn-cerrar-caja:active{opacity:0.85;transform:scale(0.97)}
+.pin-btn{background:var(--surface2);border:1px solid var(--border);border-radius:50%;width:72px;height:72px;font-size:22px;font-weight:700;color:var(--text);cursor:pointer;transition:background 0.15s}
+.pin-btn:active{background:var(--accent);color:#0f172a}
+.pin-del{font-size:18px}
+/* ── TABLET RESPONSIVE ── */
+@media (min-width: 600px) {
+  .screen { padding: 24px 40px calc(90px + var(--sb)); }
+  #screen-ingreso-cliente { padding: 24px 40px calc(90px + var(--sb)); }
+  .ticket-wrap { max-width: 640px; margin: 0 auto; }
+  .input { font-size: 16px; padding: 14px 16px; }
+  .btn-guardar { font-size: 18px; padding: 18px; }
+  .nav-btn .ni { font-size: 24px; }
+  .section-title { font-size: 22px; }
+}
+  .topbar { max-width: 768px; margin: 0 auto; padding: 14px 24px; font-size: 18px; }
+  .screens { max-width: 768px; margin: 0 auto; }
+  .bottomnav { max-width: 768px; margin: 0 auto; left: 50%; transform: translateX(-50%); position: fixed; bottom: 0; width: 100%; }
+
+  /* Todas las screens centradas */
+  .screen { padding: 24px 32px calc(90px + var(--sb)); max-width: 768px; }
+  #screen-ingreso-cliente { padding: 24px 32px calc(90px + var(--sb)); }
+
+  /* HOME */
+  #screen-home { align-items: center; padding: 40px 48px calc(90px + var(--sb)); }
+  .home-logo { font-size: 72px; }
+  .home-title { font-size: 28px; }
+  .home-btn { max-width: 520px; width: 100%; padding: 32px 24px; font-size: 18px; }
+  .home-btn-icon { font-size: 48px; }
+  .home-btn-label { font-size: 22px; }
+  .home-btn-sub { font-size: 15px; }
+
+  /* INGRESO CLIENTE */
+  #screen-ingreso-cliente > div { max-width: 560px; margin: 0 auto; }
+
+  /* INGRESO PEDIDO */
+  .ticket-wrap { max-width: 580px; margin: 0 auto; }
+
+  /* RETIRO */
+  #screen-retiro > div { max-width: 580px; margin: 0 auto; }
+  #retiro-modo-sistema { max-width: 580px; }
+  #retiro-modo-fisico { max-width: 580px; }
+
+  /* ORDENES */
+  #screen-ordenes { max-width: 768px; }
+  #pedidos-list { max-width: 580px; margin: 0 auto; }
+  .filtros { max-width: 580px; margin: 0 auto 14px; }
+  #buscar-ord { max-width: 580px; }
+
+  /* CAJA */
+  #caja-content { max-width: 580px; margin: 0 auto; }
+
+  /* CLIENTES */
+  #cli-list { max-width: 580px; margin: 0 auto; }
+
+  /* DOMICILIOS */
+  #retiros-list { max-width: 580px; margin: 0 auto; }
+
+  /* DRAWER */
+  .drawer { max-width: 580px; left: 50%; transform: translateX(-50%) translateY(100%); border-radius: 20px 20px 0 0; }
+  .drawer.open { transform: translateX(-50%) translateY(0); }
+
+  /* INPUTS Y BOTONES */
+  .input { font-size: 16px; padding: 14px 16px; }
+  .btn-guardar { font-size: 18px; padding: 18px; }
+  .card { padding: 20px; }
+  .nav-btn { font-size: 12px; }
+  .nav-btn .ni { font-size: 24px; }
+
+  /* PEDIDO CARDS */
+  .pedido-card { padding: 16px 18px; }
+  .pc-ticket { font-size: 16px; }
+  .pc-cliente { font-size: 14px; }
+  .section-title { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+<!-- PIN DE ACCESO -->
+<div id="pin-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;touch-action:manipulation">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:360px;padding:32px">
+    <div style="font-size:48px;margin-bottom:16px">🧺</div>
+    <div style="font-size:22px;font-weight:800;margin-bottom:8px">Lavandería</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:32px;text-align:center">Ingresá tu PIN para continuar</div>
+    <div style="display:flex;gap:12px;margin-bottom:24px">
+      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d1"></div>
+      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d2"></div>
+      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d3"></div>
+      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d4"></div>
+    </div>
+    <div id="pin-error" style="color:var(--red);font-size:13px;margin-bottom:16px;height:20px;text-align:center"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:280px">
+      <button class="pin-btn" type="button">1</button>
+      <button class="pin-btn" type="button">2</button>
+      <button class="pin-btn" type="button">3</button>
+      <button class="pin-btn" type="button">4</button>
+      <button class="pin-btn" type="button">5</button>
+      <button class="pin-btn" type="button">6</button>
+      <button class="pin-btn" type="button">7</button>
+      <button class="pin-btn" type="button">8</button>
+      <button class="pin-btn" type="button">9</button>
+      <div></div>
+      <button class="pin-btn" type="button">0</button>
+      <button class="pin-btn pin-del" type="button">⌫</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <span class="topbar-logo">🧺</span>
+      <span class="topbar-title">Lavandería</span>
+    </div>
+    <div style="font-size:13px;color:var(--muted)" id="tb-fecha"></div>
+  </div>
+
+  <div class="screens">
+
+    <!-- HOME -->
+    <div class="screen active" id="screen-home" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px 24px;padding-bottom:calc(32px + var(--sb))">
+      <div style="width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;gap:20px">
+        <div class="home-logo">🧺</div>
+        <div class="home-title">¿Qué operación?</div>
+        <button class="home-btn ingreso" id="btn-home-ingreso">
+          <span class="home-btn-icon">📥</span>
+          <span class="home-btn-label">Ingreso de pedido</span>
+          <span class="home-btn-sub">El cliente deja ropa</span>
+        </button>
+        <button class="home-btn retiro" id="btn-home-retiro">
+          <span class="home-btn-icon">📦</span>
+          <span class="home-btn-label">Retiro de pedido</span>
+          <span class="home-btn-sub">El cliente viene a buscar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- INGRESO PASO 1: CLIENTE -->
+    <div class="screen" id="screen-ingreso-cliente">
+      <div style="max-width:520px;margin:0 auto">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+          <button class="btn btn-secondary btn-sm" style="width:auto" id="btn-volver-desde-cliente">← Volver</button>
+          <div style="font-size:18px;font-weight:700">👤 Datos del cliente</div>
+        </div>
+
+        <!-- BUSCADOR RÁPIDO -->
+        <div style="position:relative;margin-bottom:16px">
+          <input class="input" id="cli-search" type="text"
+            placeholder="Buscá por nombre, celular o dirección..."
+            autocomplete="off" autocorrect="off" spellcheck="false">
+          <div class="ac-list" id="cli-ac"></div>
+        </div>
+
+        <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:16px">— o completá la dirección —</div>
+
+        <!-- DIRECCIÓN ESTRUCTURADA -->
+        <div class="card" style="margin-bottom:14px">
+          <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">📍 Dirección</div>
+
+          <div class="input-group">
+            <label class="input-label">Calle</label>
+            <select class="input" id="c-calle">
+              <option value="">Seleccioná una calle...</option>
+              <option>La Pampa</option>
+              <option>O'Higgins</option>
+              <option>Arcos</option>
+              <option>José Hernández</option>
+              <option>Sucre</option>
+              <option>Echeverría</option>
+              <option>3 de Febrero</option>
+              <option>11 de Septiembre</option>
+              <option value="otra">Otra calle...</option>
+            </select>
+          </div>
+          <div class="input-group" id="calle-libre-wrap" style="display:none">
+            <label class="input-label">Nombre de la calle</label>
+            <input class="input" id="c-calle-libre" type="text" placeholder="Ingresá la calle">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div class="input-group" style="margin-bottom:0">
+              <label class="input-label">Altura</label>
+              <input class="input" id="c-altura" type="number" inputmode="numeric" placeholder="1234">
+            </div>
+            <div class="input-group" style="margin-bottom:0">
+              <label class="input-label">Piso</label>
+              <input class="input" id="c-piso" type="text" placeholder="3°">
+            </div>
+            <div class="input-group" style="margin-bottom:0">
+              <label class="input-label">Depto</label>
+              <input class="input" id="c-depto" type="text" placeholder="A">
+            </div>
+          </div>
+        </div>
+
+        <!-- SUGERENCIAS POR DIRECCIÓN -->
+        <div id="dir-sugerencias" style="display:none" class="card" style="margin-bottom:14px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">👥 Clientes en esta dirección — confirmá o modificá</div>
+          <div id="dir-sugerencias-lista"></div>
+        </div>
+
+        <!-- DATOS PERSONALES -->
+        <div class="card" style="margin-bottom:14px">
+          <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">📱 Datos del cliente</div>
+          <div class="input-group">
+            <label class="input-label">Celular</label>
+            <div style="position:relative">
+              <input class="input" id="c-tel" type="tel" inputmode="numeric" placeholder="11 2345-6789">
+              <span id="tel-validado" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--green);font-size:16px">✓</span>
+            </div>
+          </div>
+          <div class="input-group" style="margin-bottom:0">
+            <label class="input-label">Nombre (opcional)</label>
+            <input class="input" id="cli-nombre" type="text" placeholder="Nombre o apodo">
+          </div>
+        </div>
+
+        <!-- ALERTA PEDIDOS PENDIENTES -->
+        <div id="pendientes-banner" style="display:none" class="alert alert-warn"></div>
+
+        <input type="hidden" id="c-id">
+        <input type="hidden" id="c-dir">
+
+        <button class="btn btn-primary" id="btn-continuar-pedido">Continuar al pedido →</button>
+      </div>
+    </div>
+
+    <!-- INGRESO PASO 2: PEDIDO -->
+    <div class="screen" id="screen-ingreso">
+      <div class="ticket-wrap">
+
+        <!-- HEADER CLIENTE FIJO -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <button class="btn btn-secondary btn-sm" style="width:auto" id="btn-volver-ingreso">← Cliente</button>
+          <div style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+            <div style="font-size:13px;font-weight:600" id="header-cli-nombre">—</div>
+            <div style="font-size:12px;color:var(--muted)" id="header-cli-dir">—</div>
+            <div style="font-size:12px;color:var(--muted)" id="header-cli-tel">—</div>
+          </div>
+        </div>
+
+        <!-- BANNER DEUDA -->
+        <div id="deuda-banner" style="display:none;background:rgba(251,146,60,0.15);border:1px solid rgba(251,146,60,0.4);color:var(--orange);font-size:13px;font-weight:600;padding:10px 14px;border-radius:8px;margin-bottom:10px"></div>
+
+        <!-- TICKET NUM -->
+        <div class="ticket-header" style="border-radius:var(--radius) var(--radius) 0 0">
+          <div class="ticket-header-top">
+            <span class="ticket-num" id="tkt-num">N° —</span>
+            <span class="ticket-fecha" id="tkt-fecha">—</span>
+          </div>
+        </div>
+
+        <div class="grupos-wrap" id="grupos-wrap">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+
+        <div class="ticket-totales">
+          <div id="resumen-lineas" style="margin-bottom:12px;display:none">
+            <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Resumen</div>
+            <div id="resumen-lista"></div>
+          </div>
+          <div class="tot-row total">
+            <span>TOTAL</span>
+            <span id="tot-val">$0</span>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--muted)">
+              <input type="checkbox" id="chk-dom" style="width:18px;height:18px;accent-color:var(--accent)">
+              🚚 Incluir delivery ($<span id="precio-delivery">0</span>)
+            </label>
+          </div>
+          <div id="pago-contenedor-ingreso"></div>
+          <div style="margin-bottom:14px">
+            <input class="input" id="obs" type="text" placeholder="Observaciones (manchas, prendas delicadas...)">
+          </div>
+          <button class="btn-guardar" id="btn-guardar" disabled>💾 Guardar pedido</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRMACION -->
+    <div class="screen" id="screen-confirm">
+      <div class="confirm-wrap">
+        <div class="confirm-icon">✅</div>
+        <div style="font-size:14px;color:var(--muted)">Pedido registrado</div>
+        <div class="confirm-ticket-num" id="conf-ticket">—</div>
+        <div class="confirm-sub" id="conf-resumen">—</div>
+      </div>
+      <div class="alert alert-info" style="text-align:center;font-size:16px;font-weight:700">
+        🗒️ Post-it: <span id="conf-ticket2" style="font-size:20px">—</span>
+      </div>
+      <div id="wa-section">
+        <div class="wa-box">
+          <div style="font-size:13px;color:var(--muted)">📱 Enviar WhatsApp al número:</div>
+          <div class="wa-num" id="conf-tel">—</div>
+          <div class="wa-hint">Confirmá con el cliente que el número es correcto</div>
+        </div>
+        <div id="edit-tel-wrap" style="display:none;margin-bottom:12px">
+          <div class="input-group">
+            <label class="input-label">Número correcto</label>
+            <input class="input" id="edit-tel" type="tel" placeholder="11 2345-6789">
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" id="btn-confirmar-tel">Guardar y enviar</button>
+            <button class="btn btn-secondary btn-sm" id="btn-cancel-tel">Cancelar</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px" id="wa-btns">
+          <button class="btn btn-green" id="btn-enviar-wa">📄 Enviar comprobante por WhatsApp</button>
+          <button class="btn btn-secondary btn-sm" style="width:auto;align-self:center" id="btn-editar-tel">✏️ Corregir número</button>
+          <button class="btn btn-secondary btn-sm" style="width:auto;align-self:center" id="btn-skip-wa">Sin WhatsApp</button>
+        </div>
+      </div>
+      <div id="no-tel-section" style="display:none">
+        <div class="alert alert-warn">Sin número de celular registrado</div>
+        <button class="btn btn-secondary" id="btn-continuar-notel">Continuar</button>
+      </div>
+    </div>
+
+    <!-- RETIRO -->
+    <div class="screen" id="screen-retiro" style="overflow-x:hidden">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <button class="btn btn-secondary btn-sm" style="width:auto" id="btn-volver-retiro">←</button>
+        <div class="section-title" style="margin:0">📦 Retiro de pedido</div>
+      </div>
+
+      <!-- DOS MODOS -->
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button class="btn" id="btn-modo-sistema" style="flex:1;background:rgba(34,211,238,0.12);border:2px solid var(--accent);color:var(--accent);font-size:14px;padding:14px 10px">
+          🔍<br>Buscar en<br>el sistema
+        </button>
+        <button class="btn" id="btn-modo-fisico" style="flex:1;background:var(--surface2);border:2px solid var(--border);color:var(--text);font-size:14px;padding:14px 10px">
+          📋<br>Ticket<br>físico
+        </button>
+      </div>
+
+      <!-- MODO SISTEMA -->
+      <div id="retiro-modo-sistema">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input class="input" id="buscar-retiro" type="text"
+            placeholder="N° ticket, nombre, teléfono o dirección..." style="flex:1;margin-bottom:0">
+          <button id="btn-scan-qr" style="padding:13px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--accent);font-size:20px;cursor:pointer;flex-shrink:0" title="Escanear QR">📷</button>
+        </div>
+        <div id="retiro-list">
+          <div class="empty"><div class="empty-icon">🔍</div>Escribí para buscar</div>
+        </div>
+      </div>
+
+      <!-- MODO TICKET FISICO -->
+      <div id="retiro-modo-fisico" style="display:none;overflow:hidden">
+        <div class="input-group">
+          <label class="input-label">N° de ticket físico</label>
+          <input class="input" id="tf-numero" type="text" placeholder="Ej: 07486">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Cliente (opcional)</label>
+          <input class="input" id="tf-cliente" type="text" placeholder="Nombre o dirección">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Total del ticket</label>
+          <input class="input" id="tf-total" type="number" inputmode="decimal" placeholder="$0">
+        </div>
+
+        <!-- ESTADO DE PAGO -->
+        <div class="input-group">
+          <label class="input-label">Estado del pago</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div class="tipo-btn" id="tf-btn-pago" data-modo="pago" style="padding:14px">
+              💵 Paga ahora
+            </div>
+            <div class="tipo-btn" id="tf-btn-pagado" data-modo="pagado" style="padding:14px">
+              ✅ Ya estaba pago
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGO AHORA (oculto por defecto) -->
+        <div id="tf-pago-wrap" style="display:none">
+          <div class="pago-combinado">
+            <div class="pago-combinado-title">¿Cuánto paga y cómo?</div>
+            <div class="pago-row">
+              <span class="pago-icon-label">💵 Efectivo</span>
+              <input class="pago-monto-input" id="tf-efectivo" type="number" inputmode="decimal" placeholder="$0" style="min-width:0;width:100%">
+            </div>
+            <div class="pago-row">
+              <span class="pago-icon-label">💳 Tarjeta / Transf.</span>
+              <input class="pago-monto-input" id="tf-tarjeta" type="number" inputmode="decimal" placeholder="$0" style="min-width:0;width:100%">
+            </div>
+            <div class="pago-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+              <span class="pago-icon-label" style="color:var(--muted);font-size:13px">📒 Saldo pendiente</span>
+              <span id="tf-debe-val" style="font-size:14px;color:var(--orange);font-weight:600;flex:1;text-align:right">$0</span>
+            </div>
+            <div class="pago-resumen" id="tf-pago-resumen"></div>
+          </div>
+        </div>
+
+        <button class="btn btn-green" id="btn-registrar-fisico" style="margin-top:8px">✅ Registrar entrega</button>
+      </div>
+    </div>
+
+    <!-- ORDENES -->
+    <div class="screen" id="screen-ordenes">
+      <div class="section-title">📋 Órdenes</div>
+      <div style="position:relative;margin-bottom:12px">
+        <input class="input" id="buscar-ord" type="text" placeholder="Ticket, nombre, teléfono, dirección...">
+      </div>
+      <div class="filtros" id="filtros-wrap">
+        <div class="filtro active" data-filtro="todos">Todos</div>
+        <div class="filtro" data-filtro="Recibido">📥 Recibido</div>
+        <div class="filtro" data-filtro="En proceso">⚙️ En proceso</div>
+        <div class="filtro" data-filtro="Listo">✅ Listo</div>
+        <div class="filtro" data-filtro="Entregado">📦 Entregado</div>
+      </div>
+      <div id="pedidos-list"></div>
+    </div>
+
+    <!-- CAJA -->
+    <div class="screen" id="screen-caja">
+      <div class="section-title">💰 Caja del día</div>
+      <div id="caja-content"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div class="screen" id="screen-clientes">
+      <div class="section-title">👤 Clientes</div>
+      <div style="position:relative;margin-bottom:12px">
+        <input class="input" id="buscar-cli" type="text" placeholder="Nombre, dirección o celular...">
+      </div>
+      <div id="cli-list"><div class="empty"><div class="empty-icon">👤</div>Buscá un cliente</div></div>
+    </div>
+
+    <!-- RETIROS A DOMICILIO -->
+    <div class="screen" id="screen-retiros-dom">
+      <div class="section-title">🚚 Retiros a domicilio</div>
+      <div id="retiros-list"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <nav class="bottomnav">
+    <button class="nav-btn active" id="nav-home"><span class="ni">🏠</span><span>Inicio</span></button>
+    <button class="nav-btn" id="nav-ordenes"><span class="ni">📋</span><span>Órdenes</span><span class="nbadge" id="nbadge">0</span></button>
+    <button class="nav-btn" id="nav-retiros-dom"><span class="ni">🚚</span><span>Dom.</span></button>
+    <button class="nav-btn" id="nav-caja"><span class="ni">💰</span><span>Caja</span></button>
+    <button class="nav-btn" id="nav-clientes"><span class="ni">👤</span><span>Clientes</span></button>
+  </nav>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer"><div class="drawer-handle"></div><div id="drawer-content"></div></div>
+<div class="toast" id="toast"></div>
+
+<!-- MODAL POST-GUARDADO -->
+<div id="modal-postguar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:400;align-items:center;justify-content:center;padding:24px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:420px;text-align:center">
+    <div style="font-size:48px;margin-bottom:12px" id="pg-icon">✅</div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:6px" id="pg-titulo">Pedido guardado</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:24px" id="pg-sub">¿Qué querés hacer ahora?</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" id="pg-btn-nuevo">➕ Cargar otro pedido</button>
+      <button class="btn btn-secondary" id="pg-btn-inicio">🏠 Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── ESTADO ───────────────────────────────────
+var S = {
+  servicios:[], pedidos:[], filtro:'todos',
+  clienteSel:null, pedidoActual:null,
+  deliveryId:null, deliveryPrecio:0,
+  estadoPagoFisico:null,
+  _modoPagoIngreso:null, _modoPagoCobro:null,
+  _totalIngreso:0, _fondoEditado:0,
+  _movimientosCaja:[],
+  _contextoDetalle:'ordenes', // 'ordenes' o 'retiro'
+};
+
+var GRUPOS = [
+  {key:'Lavandería',icon:'🧺',ids:['LV01','LV02','LV03','LV04','LV05','LV11','LV12']},
+  {key:'Planchado', icon:'👔',ids:['PL01','PL02','PL03','PL04','PL05','PL06','PL07','PL08','PL09','PL10','PL11','PL12','PL13','PL14']},
+  {key:'Tintorería',icon:'🧥',ids:['TN01','TN02','TN03','TN04','TN05','TN06','TN07','TN08','TN09','TN10','TN11','TN12','TN13','TN14']},
+  {key:'Cortinas',  icon:'🪟',ids:['LV06','LV07','LV08','LV09','LV10']},
+  {key:'Teñido',    icon:'🎨',ids:['TE01','TE02','TE03','TE04','TE05','TE06','TE07','TE08']},
+  {key:'Especiales',icon:'⭐',ids:['ES01','ES02']},
+  {key:'Delivery',  icon:'🚚',ids:['LV13']},
+];
+
+var CALLES = ["La Pampa","O'Higgins","Arcos","José Hernández","Sucre","Echeverría","3 de Febrero","11 de Septiembre"];
+
+// ─── API ──────────────────────────────────────
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzpndKN6kXqDbFml1hm74bhXLE7kteqqby8-FBQAkZnC4B5A1y05Et7klrnhtoDDXzWQA/exec';
+
+async function api(action, params) {
+  var url = APPS_SCRIPT_URL + '?action=' + encodeURIComponent(action);
+  // Agregar params como query string para GET
+  if (params && Object.keys(params).length > 0) {
+    Object.keys(params).forEach(function(k) {
+      var v = params[k];
+      if (v !== null && v !== undefined) {
+        url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v);
+      }
+    });
+  }
+  var res = await fetch(url, { redirect: 'follow' });
+  var data = await res.json();
+  if (data.ok === false) throw new Error(data.error || 'Error');
+  return data.data !== undefined ? data.data : data;
+}
+
+// ─── HELPERS ──────────────────────────────────
+function fmt(n) { return parseFloat(n||0).toLocaleString('es-AR'); }
+function fmtFecha(ts) {
+  if (!ts) return '';
+  var d = new Date(ts);
+  return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+}
+function toast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+(type||''); el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 3500);
+}
+function debounce(fn, ms) {
+  var t;
+  return function(){ var a=arguments; clearTimeout(t); t=setTimeout(function(){ fn.apply(null,a); },ms); };
+}
+function getVal(id) { var el=document.getElementById(id); return el?parseFloat(el.value||0):0; }
+function el(id) { return document.getElementById(id); }
+function on(id, event, fn) { var e=el(id); if(e) e.addEventListener(event,fn); }
+
+// ─── NAVEGACIÓN ───────────────────────────────
+function hideAll() {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); s.style.display='none'; });
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+}
+function showScreen(id) {
+  hideAll();
+  var scr = document.getElementById(id);
+  if (scr) { scr.style.display='block'; scr.classList.add('active'); scr.scrollTop=0; }
+}
+
+function goTo(name) {
+  if (name === 'ingreso') { iniciarIngreso(); return; }
+  showScreen('screen-' + name);
+  var nav = el('nav-' + name); if (nav) nav.classList.add('active');
+  if (name === 'ordenes')    cargarPedidos();
+  if (name === 'caja')       cargarCaja();
+  if (name === 'retiros-dom'){ cargarRetiros(); }
+}
+
+// ─── MODAL POST-GUARDADO ──────────────────────
+var _modalPostDestino = 'ingreso';
+function mostrarModalPostGuar(titulo, sub, icon, destino) {
+  _modalPostDestino = destino || 'ingreso';
+  el('pg-icon').textContent   = icon  || '✅';
+  el('pg-titulo').textContent = titulo || 'Operación completada';
+  el('pg-sub').textContent    = sub   || '¿Qué querés hacer ahora?';
+  el('pg-btn-nuevo').textContent = destino==='retiro' ? '📦 Registrar otro retiro' : '➕ Cargar otro pedido';
+  el('modal-postguar').style.display = 'flex';
+}
+function cerrarModalPostGuar() { el('modal-postguar').style.display='none'; }
+
+// ─── PAGO — cuatro modos ──────────────────────
+function renderBotonesPago(idContenedor, total, onChange) {
+  var cont = el(idContenedor); if (!cont) return;
+  cont.innerHTML =
+    '<div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Forma de pago</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
+      '<div class="modo-pago-btn" data-modo="efectivo" style="padding:14px 8px;border-radius:12px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-align:center">💵<br>Todo efectivo</div>'+
+      '<div class="modo-pago-btn" data-modo="tarjeta"  style="padding:14px 8px;border-radius:12px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-align:center">💳<br>Todo tarjeta</div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'+
+      '<div class="modo-pago-btn" data-modo="partes" style="padding:14px 8px;border-radius:12px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-align:center">✂️<br>Parte y parte</div>'+
+      '<div class="modo-pago-btn" data-modo="retiro" style="padding:14px 8px;border-radius:12px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-align:center">📒<br>Paga en el retiro</div>'+
+    '</div>'+
+    '<div id="'+idContenedor+'-partes" style="display:none">'+
+      '<div class="pago-combinado">'+
+        '<div class="pago-row"><span class="pago-icon-label">💵 Efectivo</span><input class="pago-monto-input" id="'+idContenedor+'-ef" type="number" inputmode="decimal" placeholder="$0" style="min-width:0;width:100%"></div>'+
+        '<div class="pago-row"><span class="pago-icon-label">💳 Tarjeta</span><input class="pago-monto-input" id="'+idContenedor+'-tar" type="number" inputmode="decimal" placeholder="$0" style="min-width:0;width:100%"></div>'+
+        '<div class="pago-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">'+
+          '<span class="pago-icon-label" style="color:var(--muted);font-size:13px">📒 Queda debiendo</span>'+
+          '<span id="'+idContenedor+'-debe" style="font-size:14px;color:var(--orange);font-weight:600;flex:1;text-align:right">$0</span>'+
+        '</div>'+
+        '<div class="pago-resumen" id="'+idContenedor+'-resumen"></div>'+
+      '</div>'+
+    '</div>'+
+    '<div id="'+idContenedor+'-retiro" style="display:none">'+
+      '<div class="alert alert-warn" style="margin-top:4px">📒 Total $'+fmt(total)+' — se cobra al retirar.</div>'+
+    '</div>';
+
+  var colores = {
+    efectivo:{border:'var(--green)',bg:'rgba(74,222,128,0.1)',color:'var(--green)'},
+    tarjeta: {border:'var(--accent)',bg:'rgba(34,211,238,0.1)',color:'var(--accent)'},
+    partes:  {border:'var(--orange)',bg:'rgba(251,146,60,0.1)',color:'var(--orange)'},
+    retiro:  {border:'#c084fc',bg:'rgba(192,132,252,0.1)',color:'#c084fc'},
+  };
+
+  cont.querySelectorAll('.modo-pago-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var modo = btn.dataset.modo;
+      cont.querySelectorAll('.modo-pago-btn').forEach(function(b){
+        b.style.borderColor='var(--border)'; b.style.background='var(--surface2)'; b.style.color='var(--text)';
+      });
+      var col = colores[modo]||colores.efectivo;
+      btn.style.borderColor=col.border; btn.style.background=col.bg; btn.style.color=col.color;
+      el(idContenedor+'-partes').style.display = modo==='partes'?'block':'none';
+      el(idContenedor+'-retiro').style.display = modo==='retiro'?'block':'none';
+      if (onChange) onChange(modo, total);
+    });
+  });
+
+  var efEl=el(idContenedor+'-ef'), tarEl=el(idContenedor+'-tar');
+  if (efEl)  efEl.addEventListener('input',  function(){ actualizarResumenPartes(idContenedor,total,onChange); });
+  if (tarEl) tarEl.addEventListener('input', function(){ actualizarResumenPartes(idContenedor,total,onChange); });
+}
+
+function actualizarResumenPartes(idC, total, onChange) {
+  var ef=getVal(idC+'-ef'), tar=getVal(idC+'-tar'), pago=ef+tar, debe=Math.max(0,total-pago);
+  var debeEl=el(idC+'-debe'); if(debeEl) debeEl.textContent='$'+fmt(debe);
+  var resEl=el(idC+'-resumen');
+  if (resEl && pago>0) {
+    var h='';
+    if (ef>0)  h+='<div class="pago-resumen-row"><span>Efectivo</span><span>$'+fmt(ef)+'</span></div>';
+    if (tar>0) h+='<div class="pago-resumen-row"><span>Tarjeta</span><span>$'+fmt(tar)+'</span></div>';
+    h += debe>0?'<div class="pago-resumen-row saldo"><span>Queda debiendo</span><span>$'+fmt(debe)+'</span></div>':'<div class="pago-resumen-row ok"><span>✅ Completo</span></div>';
+    resEl.innerHTML=h; resEl.style.display='block';
+  } else if (resEl) resEl.style.display='none';
+  if (onChange) onChange('partes', total);
+}
+
+function getPago(idC, total, modo) {
+  if (!modo) return null;
+  if (modo==='efectivo') return {efectivo:total,tarjeta:0,debe:0,cobros:[{monto:total,medio:'Efectivo'}],medio:'Efectivo'};
+  if (modo==='tarjeta')  return {efectivo:0,tarjeta:total,debe:0,cobros:[{monto:total,medio:'Tarjeta/Transferencia'}],medio:'Tarjeta/Transferencia'};
+  if (modo==='retiro')   return {efectivo:0,tarjeta:0,debe:total,cobros:[],medio:'Cuenta corriente'};
+  if (modo==='partes') {
+    var ef=getVal(idC+'-ef'), tar=getVal(idC+'-tar'), debe=Math.max(0,total-ef-tar);
+    var cobros=[]; if(ef>0) cobros.push({monto:ef,medio:'Efectivo'}); if(tar>0) cobros.push({monto:tar,medio:'Tarjeta/Transferencia'});
+    return {efectivo:ef,tarjeta:tar,debe:debe,cobros:cobros,medio:cobros.length===2?'Combinado':(cobros.length===1?cobros[0].medio:'Cuenta corriente')};
+  }
+  return null;
+}
+
+function calcPagoCombinado(idEf,idTar,idDebe,idRes,total) {
+  var ef=getVal(idEf),tar=getVal(idTar),pago=ef+tar,debe=Math.max(0,total-pago);
+  var debeEl=el(idDebe); if(debeEl) debeEl.textContent='$'+fmt(debe);
+  var resEl=el(idRes);
+  if (resEl && pago>0) {
+    var h=''; if(ef>0) h+='<div class="pago-resumen-row"><span>Efectivo</span><span>$'+fmt(ef)+'</span></div>'; if(tar>0) h+='<div class="pago-resumen-row"><span>Tarjeta</span><span>$'+fmt(tar)+'</span></div>';
+    h+=debe>0?'<div class="pago-resumen-row saldo"><span>Queda debiendo</span><span>$'+fmt(debe)+'</span></div>':'<div class="pago-resumen-row ok"><span>✅ Completo</span></div>';
+    resEl.innerHTML=h; resEl.style.display='block';
+  } else if (resEl) resEl.style.display='none';
+  return {efectivo:ef,tarjeta:tar,debe:debe,pagado:pago};
+}
+
+// ─── INIT ─────────────────────────────────────
+// ─── PIN ──────────────────────────────────────
+var PIN_CORRECTO = '1234'; // Cambiar en el Sheet o acá directamente
+var _pinActual = '';
+
+function initPin() {
+  var pinScreen = el('pin-screen'); if (!pinScreen) return;
+  document.querySelectorAll('.pin-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var v = btn.textContent.trim();
+      if (v === '⌫') {
+        _pinActual = _pinActual.slice(0,-1);
+      } else if (_pinActual.length < 4) {
+        _pinActual += v;
+      }
+      actualizarDotsPIN();
+      if (_pinActual.length === 4) {
+        setTimeout(verificarPIN, 200);
+      }
+    });
+  });
+}
+
+function actualizarDotsPIN() {
+  for (var i=1; i<=4; i++) {
+    var d = el('pin-d'+i);
+    if (d) d.style.background = i<=_pinActual.length ? 'var(--accent)' : 'var(--border)';
+  }
+}
+
+function verificarPIN() {
+  if (_pinActual === PIN_CORRECTO) {
+    // Remover completamente del DOM para no interferir con eventos
+    var pinScreen = el('pin-screen');
+    if (pinScreen) pinScreen.parentNode.removeChild(pinScreen);
+    el('pin-error') && (el('pin-error').textContent = '');
+    // Inicializar la app
+    cargarServicios();
+    cargarPedidos();
+  } else {
+    el('pin-error').textContent = 'PIN incorrecto. Intentá de nuevo.';
+    _pinActual = '';
+    actualizarDotsPIN();
+    // Vibración en mobile si está disponible
+    if (navigator.vibrate) navigator.vibrate(200);
+    setTimeout(function(){ var e=el('pin-error'); if(e) e.textContent=''; }, 2000);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    var tbf = el('tb-fecha');
+    if (tbf) tbf.textContent = new Date().toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'2-digit'});
+
+    // PIN
+    initPin();
+
+    // NAV — usar on() para no romper si falta algún elemento
+    on('nav-home',        'click', function(){ goTo('home'); });
+    on('nav-ordenes',     'click', function(){ goTo('ordenes'); });
+    on('nav-retiros-dom', 'click', function(){ goTo('retiros-dom'); });
+    on('nav-caja',        'click', function(){ goTo('caja'); });
+    on('nav-clientes',    'click', function(){ goTo('clientes'); });
+
+    // HOME
+    on('btn-home-ingreso', 'click', function(){ goTo('ingreso'); });
+    on('btn-home-retiro',  'click', iniciarRetiro);
+
+    // PASO 1: CLIENTE
+    on('btn-volver-desde-cliente', 'click', function(){ goTo('home'); });
+    on('btn-continuar-pedido',     'click', continuarAPedido);
+    on('cli-search',  'input', debounce(autocompleteCliente, 300));
+    on('c-calle', 'change', function(){
+      var wrap = el('calle-libre-wrap');
+      if (wrap) wrap.style.display = this.value==='otra'?'block':'none';
+      buscarPorDireccion();
+    });
+    on('c-calle-libre', 'input', debounce(buscarPorDireccion, 500));
+    on('c-altura',      'input', debounce(buscarPorDireccion, 500));
+    on('c-piso',        'input', debounce(buscarPorDireccion, 500));
+    on('c-depto',       'input', debounce(buscarPorDireccion, 500));
+    on('c-tel',         'input', validarCelular);
+
+    // PASO 2: PEDIDO
+    on('btn-volver-ingreso', 'click', function(){ showScreen('screen-ingreso-cliente'); });
+    on('btn-guardar',        'click', guardarPedido);
+    on('chk-dom',            'change', calcTotal);
+
+    // CONFIRMACION
+    on('btn-enviar-wa',        'click', enviarWA);
+    on('btn-skip-wa',          'click', function(){ mostrarModalPostGuar('✅ Pedido registrado','¿Qué querés hacer ahora?','✅'); });
+    on('btn-continuar-notel',  'click', function(){ mostrarModalPostGuar('✅ Pedido registrado','¿Qué querés hacer ahora?','✅'); });
+    on('btn-editar-tel',       'click', editarTel);
+    on('btn-cancel-tel',       'click', cancelEditTel);
+    on('btn-confirmar-tel',    'click', confirmarTel);
+
+    // MODAL POST
+    on('pg-btn-nuevo',  'click', function(){ cerrarModalPostGuar(); goTo(_modalPostDestino); });
+    on('pg-btn-inicio', 'click', function(){ cerrarModalPostGuar(); goTo('home'); });
+
+    // RETIRO
+    on('btn-volver-retiro',   'click', function(){ goTo('home'); });
+    on('btn-modo-sistema',    'click', function(){ setModoRetiro('sistema'); });
+    on('btn-modo-fisico',     'click', function(){ setModoRetiro('fisico'); });
+    on('buscar-retiro',       'input', debounce(buscarParaRetiro, 300));
+    on('btn-scan-qr',         'click', abrirScannerQR);
+    on('btn-registrar-fisico','click', registrarTicketFisico);
+    on('tf-btn-pago',         'click', function(){ setEstadoPagoFisico('pago'); });
+    on('tf-btn-pagado',       'click', function(){ setEstadoPagoFisico('pagado'); });
+    on('tf-efectivo',         'input', onTFPagoChange);
+    on('tf-tarjeta',          'input', onTFPagoChange);
+    on('tf-total',            'input', onTFPagoChange);
+
+    // ORDENES
+    var fw = el('filtros-wrap');
+    if (fw) fw.addEventListener('click', function(e) {
+      var f=e.target.closest('.filtro'); if(!f) return;
+      S.filtro=f.dataset.filtro;
+      document.querySelectorAll('.filtro').forEach(function(b){ b.classList.remove('active'); });
+      f.classList.add('active'); renderPedidos();
+    });
+    on('buscar-ord', 'input', renderPedidos);
+
+    // CLIENTES
+    on('buscar-cli', 'input', debounce(buscarCliTab, 300));
+
+    // OVERLAY
+    on('overlay', 'click', closeDrawer);
+
+  } catch(initErr) {
+    console.error('Error en init:', initErr);
+  }
+  // NO cargar datos acá — se cargan después del PIN en verificarPIN()
+});
+
+// ─── PASO 1: CLIENTE ──────────────────────────
+function iniciarIngreso() {
+  resetCliente();
+  showScreen('screen-ingreso-cliente');
+  setTimeout(function(){ var e=el('cli-search'); if(e) e.focus(); }, 300);
+}
+
+function resetCliente() {
+  S.clienteSel = null;
+  ['cli-search','c-calle-libre','c-altura','c-piso','c-depto','c-tel','cli-nombre','c-id','c-dir'].forEach(function(id){
+    var e=el(id); if(e) e.value='';
+  });
+  var cc=el('c-calle'); if(cc) cc.value='';
+  el('cli-ac').style.display='none';
+  el('calle-libre-wrap').style.display='none';
+  el('dir-sugerencias').style.display='none';
+  el('pendientes-banner').style.display='none';
+  el('tel-validado').style.display='none';
+}
+
+function getCalle() {
+  var sel=el('c-calle').value;
+  return sel==='otra' ? el('c-calle-libre').value.trim() : sel;
+}
+
+function getDireccionCompleta() {
+  var calle=getCalle(), altura=(el('c-altura').value||'').trim();
+  if (!calle||!altura) return '';
+  var dir=calle+' '+altura;
+  var piso=(el('c-piso').value||'').trim(), depto=(el('c-depto').value||'').trim();
+  if (piso)  dir+=' '+piso+'°';
+  if (depto) dir+=' Dto '+depto;
+  return dir;
+}
+
+async function buscarPorDireccion() {
+  var dir = getDireccionCompleta(); if (!dir) return;
+  el('c-dir').value = dir;
+  try {
+    var lista = await api('buscarCliente', {q: getCalle()});
+    var lista2 = lista.filter(function(c){ return c.direccion && c.direccion.toLowerCase().indexOf(getCalle().toLowerCase()) >= 0; });
+    var sug = el('dir-sugerencias');
+    if (lista2.length > 0) {
+      el('dir-sugerencias-lista').innerHTML = lista2.map(function(c){
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">'+
+          '<div><div style="font-weight:600;font-size:14px">'+(c.nombre||'Sin nombre')+'</div>'+
+          '<div style="font-size:12px;color:var(--muted)">'+(c.telefono||'Sin celular')+'</div></div>'+
+          '<button class="btn btn-secondary btn-sm" style="font-size:12px" data-cliente=\''+JSON.stringify(c).replace(/'/g,"&#39;")+'\'>Usar este</button>'+
+          '</div>';
+      }).join('');
+      sug.style.display='block';
+      sug.querySelectorAll('[data-cliente]').forEach(function(btn){
+        btn.addEventListener('click', function(){ selClienteDesdeDir(JSON.parse(btn.dataset.cliente)); });
+      });
+      if (lista2.length===1) {
+        el('c-tel').value=lista2[0].telefono||'';
+        el('cli-nombre').value=lista2[0].nombre||'';
+        el('c-id').value=lista2[0].id||'';
+        S.clienteSel=lista2[0]; validarCelular(); verificarPendientes(lista2[0].id);
+      }
+    } else {
+      sug.style.display='none';
+    }
+  } catch(e){}
+}
+
+function selClienteDesdeDir(c) {
+  S.clienteSel=c;
+  el('c-tel').value=c.telefono||''; el('cli-nombre').value=c.nombre||'';
+  el('c-dir').value=c.direccion||''; el('c-id').value=c.id||'';
+  validarCelular(); verificarPendientes(c.id);
+  el('dir-sugerencias').style.display='none';
+}
+
+function validarCelular() {
+  var tel=(el('c-tel').value||'').replace(/\D/g,'');
+  el('tel-validado').style.display = tel.length>=8?'inline':'none';
+}
+
+async function verificarPendientes(cliId) {
+  if (!cliId) return;
+  try {
+    var pedidos=await api('getPedidos');
+    var pend=pedidos.filter(function(p){ return String(p.cliente_id)===String(cliId)&&p.estado!=='Entregado'; });
+    var banner=el('pendientes-banner');
+    if (pend.length>0) {
+      banner.innerHTML='📦 Tiene <strong>'+pend.length+' pedido'+(pend.length>1?'s':'')+' pendiente'+(pend.length>1?'s':'')+' de retiro</strong>: '+pend.map(function(p){return p.numero_ticket;}).join(', ');
+      banner.style.display='block';
+    } else banner.style.display='none';
+  } catch(e){}
+}
+
+function continuarAPedido() {
+  _fechaEstimada = null;
+  var dir = getDireccionCompleta() || (el('c-dir').value||'').trim();
+  if (!dir) { toast('Completá al menos la calle y la altura','err'); return; }
+  el('c-dir').value = dir;
+  var nombre=(el('cli-nombre').value||'').trim()||(el('cli-search').value||'').trim();
+  var tel=(el('c-tel').value||'').trim();
+  var deuda = S.clienteSel ? parseFloat(S.clienteSel.saldo_deuda||0) : 0;
+
+  // Actualizar header del paso 2
+  el('header-cli-nombre').textContent = nombre || 'Sin nombre';
+  el('header-cli-dir').textContent    = dir;
+  el('header-cli-tel').textContent    = tel ? '📱 '+tel : 'Sin celular';
+
+  // Banner deuda
+  var banner=el('deuda-banner');
+  if (banner) {
+    if (deuda>0) { banner.textContent='⚠️ Este cliente tiene un saldo pendiente de $'+fmt(deuda)+' — recordale al entregar'; banner.style.display='block'; }
+    else banner.style.display='none';
+  }
+
+  resetPedido();
+  showScreen('screen-ingreso');
+  setTimeout(renderFechasEstimadas, 100);
+}
+
+// ─── FECHA ESTIMADA ──────────────────────────
+var _fechaEstimada = null;
+var FERIADOS_2026 = ['2026-01-01','2026-02-16','2026-02-17','2026-03-23','2026-03-24',
+  '2026-04-02','2026-04-03','2026-05-01','2026-05-25','2026-06-15','2026-06-20',
+  '2026-07-09','2026-08-17','2026-10-12','2026-11-20','2026-12-08','2026-12-25'];
+
+function esDiaHabil(d) {
+  var dow = d.getDay();
+  if (dow === 0) return false; // domingo
+  var str = d.toISOString().substring(0,10);
+  if (FERIADOS_2026.indexOf(str) >= 0) return false;
+  return true;
+}
+
+function sumarDiasHabiles(base, n) {
+  var d = new Date(base); var agregados = 0;
+  while (agregados < n) {
+    d.setDate(d.getDate() + 1);
+    if (esDiaHabil(d)) agregados++;
+  }
+  return d;
+}
+
+function fmtFechaCorta(d) {
+  var dd = String(d.getDate()).padStart(2,'0');
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  return dd+'/'+mm;
+}
+
+function fmtFechaISO(d) {
+  return d.toISOString().substring(0,10);
+}
+
+function renderFechasEstimadas() {
+  var wrap = el('fecha-entrega-btns'); if (!wrap) return;
+  var hoy = new Date();
+  var opciones = [
+    { label: 'Hoy '+fmtFechaCorta(hoy), fecha: hoy },
+    { label: '+1 '+fmtFechaCorta(sumarDiasHabiles(hoy,1)), fecha: sumarDiasHabiles(hoy,1) },
+    { label: '+2 '+fmtFechaCorta(sumarDiasHabiles(hoy,2)), fecha: sumarDiasHabiles(hoy,2) },
+    { label: '+3 '+fmtFechaCorta(sumarDiasHabiles(hoy,3)), fecha: sumarDiasHabiles(hoy,3) },
+    { label: '📅 Otra', fecha: null },
+  ];
+  wrap.innerHTML = opciones.map(function(o,i){
+    return '<button style="padding:9px 14px;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer" data-idx="'+i+'">'+(o.label)+'</button>';
+  }).join('');
+  wrap.querySelectorAll('button').forEach(function(btn, i) {
+    btn.addEventListener('click', function() {
+      wrap.querySelectorAll('button').forEach(function(b){ b.style.borderColor='var(--border)'; b.style.background='var(--surface2)'; b.style.color='var(--text)'; });
+      btn.style.borderColor='var(--accent)'; btn.style.background='rgba(34,211,238,0.1)'; btn.style.color='var(--accent)';
+      if (opciones[i].fecha) {
+        _fechaEstimada = fmtFechaISO(opciones[i].fecha);
+        el('fecha-otra-wrap').style.display='none';
+        el('fecha-sel-display').textContent='Entrega estimada: '+opciones[i].label;
+        el('fecha-sel-display').style.display='block';
+      } else {
+        el('fecha-otra-wrap').style.display='block';
+        el('fecha-sel-display').style.display='none';
+        _fechaEstimada = null;
+      }
+    });
+  });
+  var otraInput = el('fecha-otra-input');
+  if (otraInput) otraInput.addEventListener('change', function(){
+    _fechaEstimada = this.value;
+    if (_fechaEstimada) {
+      var partes = _fechaEstimada.split('-');
+      el('fecha-sel-display').textContent='Entrega estimada: '+partes[2]+'/'+partes[1];
+      el('fecha-sel-display').style.display='block';
+    }
+  });
+}
+
+// ─── PASO 2: PEDIDO ───────────────────────────
+function resetIngreso() { resetCliente(); resetPedido(); }
+
+function resetPedido() {
+  _fechaEstimada = null;
+  S._modoPagoIngreso=null; S._totalIngreso=0;
+  var obs=el('obs'); if(obs) obs.value='';
+  var chk=el('chk-dom'); if(chk) chk.checked=false;
+  var btn=el('btn-guardar'); if(btn) btn.disabled=true;
+  var tv=el('tot-val'); if(tv) tv.textContent='$0';
+  var rl=el('resumen-lineas'); if(rl) rl.style.display='none';
+  var pc=el('pago-contenedor-ingreso'); if(pc) pc.innerHTML='';
+  var tf=el('tkt-fecha'); if(tf) tf.textContent=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  document.querySelectorAll('.qty-select').forEach(function(s){ s.value='0'; s.className='qty-select'; });
+  document.querySelectorAll('.srv-subtotal').forEach(function(s){ s.textContent='—'; s.className='srv-subtotal'; });
+  document.querySelectorAll('.srv-del').forEach(function(b){ b.className='srv-del'; });
+}
+
+// ─── SERVICIOS ────────────────────────────────
+async function cargarServicios() {
+  var wrap=el('grupos-wrap'); if(!wrap) return;
+  try {
+    S.servicios=await api('getServicios');
+    var delivery=S.servicios.find(function(s){ return String(s.id)==='LV13'; });
+    if (delivery) {
+      S.deliveryId=delivery.id; S.deliveryPrecio=parseFloat(delivery.precio||0);
+      var pd=el('precio-delivery'); if(pd) pd.textContent=fmt(S.deliveryPrecio);
+    }
+    var mapa={}; S.servicios.forEach(function(s){ mapa[String(s.id)]=s; });
+    var html='';
+    GRUPOS.forEach(function(g,gi) {
+      var srvsFilt=g.ids.map(function(id){ return mapa[id]; }).filter(Boolean).filter(function(s){ return String(s.id)!=='LV13'; });
+      if (!srvsFilt.length) return;
+      html+='<div class="grupo" id="grupo-'+gi+'">'+
+        '<div class="grupo-header" data-gi="'+gi+'"><div class="grupo-header-left"><span class="grupo-icon">'+g.icon+'</span><span class="grupo-nombre">'+g.key+'</span><span class="grupo-count">'+srvsFilt.length+'</span></div><span class="grupo-arrow" id="arrow-'+gi+'">▼</span></div>'+
+        '<div class="grupo-body" id="body-'+gi+'">';
+      srvsFilt.forEach(function(s) {
+        var opts=''; for(var n=0;n<=10;n++) opts+='<option value="'+n+'">'+(n===0?'—':n)+'</option>';
+        html+='<div class="srv-fila">'+
+          '<select class="qty-select" id="qty-'+s.id+'" data-id="'+s.id+'" data-precio="'+s.precio+'">'+opts+'</select>'+
+          '<div><div class="srv-nombre">'+s.nombre+'</div><div class="srv-precio-unit">$'+fmt(s.precio)+' / '+s.unidad+'</div></div>'+
+          '<div class="srv-subtotal" id="sub-'+s.id+'">—</div>'+
+          '<button class="srv-del" id="del-'+s.id+'" data-id="'+s.id+'">✕</button></div>';
+      });
+      html+='</div></div>';
+    });
+    wrap.innerHTML=html;
+    wrap.addEventListener('change', function(e){ if(e.target.classList.contains('qty-select')) onQtyChange(e.target.dataset.id,parseFloat(e.target.dataset.precio)); });
+    wrap.addEventListener('click', function(e){
+      var h=e.target.closest('.grupo-header'); if(h){ toggleGrupo(h.dataset.gi); return; }
+      var d=e.target.closest('.srv-del'); if(d) quitarServicio(d.dataset.id);
+    });
+  } catch(e){ if(wrap) wrap.innerHTML='<div style="padding:16px;color:var(--red)">Error: '+e.message+'</div>'; }
+}
+
+function toggleGrupo(gi) {
+  var body=el('body-'+gi),arrow=el('arrow-'+gi); if(!body) return;
+  var open=body.classList.contains('open');
+  body.classList.toggle('open',!open); arrow.classList.toggle('open',!open);
+}
+function onQtyChange(id,precio) {
+  var qty=parseInt((el('qty-'+id)||{}).value||'0');
+  var sub=el('sub-'+id),sel=el('qty-'+id),del=el('del-'+id);
+  if (qty>0){ sub.textContent='$'+fmt(qty*precio); sub.className='srv-subtotal activo'; sel.className='qty-select activo'; del.className='srv-del activo'; }
+  else { sub.textContent='—'; sub.className='srv-subtotal'; sel.className='qty-select'; del.className='srv-del'; }
+  calcTotal();
+}
+function quitarServicio(id){ var s=el('qty-'+id); if(s){s.value='0';onQtyChange(id,parseFloat(s.dataset.precio||0));} }
+
+function calcTotal() {
+  var total=0,lineas=[];
+  S.servicios.forEach(function(s) {
+    if (String(s.id)==='LV13') return;
+    var sel=el('qty-'+s.id); if(!sel) return;
+    var qty=parseInt(sel.value||'0');
+    if(qty>0){ var sub=qty*parseFloat(s.precio); total+=sub; lineas.push({nombre:s.nombre,qty:qty,sub:sub}); }
+  });
+  if(el('chk-dom').checked && S.deliveryPrecio>0){ total+=S.deliveryPrecio; lineas.push({nombre:'Delivery',qty:1,sub:S.deliveryPrecio}); }
+  el('tot-val').textContent='$'+fmt(total);
+  var rw=el('resumen-lineas'),rl=el('resumen-lista');
+  if(lineas.length>0){
+    rl.innerHTML=lineas.map(function(l){ return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="color:var(--muted)">'+(l.qty>1?l.qty+' × ':'')+l.nombre+'</span><span style="font-weight:600">$'+fmt(l.sub)+'</span></div>'; }).join('');
+    rw.style.display='block';
+  } else rw.style.display='none';
+  S._totalIngreso=total; S._modoPagoIngreso=null;
+  renderBotonesPago('pago-contenedor-ingreso',total,function(modo){ S._modoPagoIngreso=modo; el('btn-guardar').disabled=false; });
+  el('btn-guardar').disabled=!lineas.length;
+  return total;
+}
+
+// ─── AUTOCOMPLETE ─────────────────────────────
+async function autocompleteCliente() {
+  var q=(el('cli-search').value||'').trim(), ac=el('cli-ac');
+  if(q.length<2){ ac.style.display='none'; return; }
+  try {
+    var lista=await api('buscarCliente',{q:q});
+    var html=lista.map(function(c){
+      return '<div class="ac-item" data-cliente=\''+JSON.stringify(c).replace(/'/g,"&#39;")+'\'><div class="ac-name">'+(c.nombre||'(sin nombre)')+'</div><div class="ac-sub">'+[c.direccion,c.telefono].filter(Boolean).join(' · ')+'</div></div>';
+    }).join('');
+    ac.innerHTML=html; ac.style.display='block';
+    ac.querySelectorAll('.ac-item').forEach(function(item){
+      item.addEventListener('click', function(){
+        var c=JSON.parse(item.dataset.cliente);
+        el('cli-search').value=c.nombre||c.direccion||'';
+        selClienteDesdeDir(c);
+        ac.style.display='none';
+      });
+    });
+  } catch{ ac.style.display='none'; }
+}
+
+// ─── GUARDAR PEDIDO ───────────────────────────
+async function guardarPedido() {
+  var btn=el('btn-guardar'); btn.disabled=true; btn.textContent='Guardando...';
+  var items=[];
+  S.servicios.forEach(function(s) {
+    if(String(s.id)==='LV13') return;
+    var sel=el('qty-'+s.id); if(!sel) return;
+    var qty=parseInt(sel.value||'0');
+    if(qty>0) items.push({servicio_id:s.id,descripcion:s.nombre,cantidad:qty,precio_unitario:parseFloat(s.precio)});
+  });
+  var conDom=el('chk-dom').checked;
+  if(conDom&&S.deliveryId){ var ds=S.servicios.find(function(s){return String(s.id)===S.deliveryId;}); if(ds) items.push({servicio_id:ds.id,descripcion:'Delivery',cantidad:1,precio_unitario:parseFloat(ds.precio)}); }
+  if(!items.length){ toast('Agregá al menos un servicio','err'); btn.disabled=false; btn.textContent='💾 Guardar pedido'; return; }
+  var modo=S._modoPagoIngreso;
+  if(!modo){ toast('Seleccioná la forma de pago','err'); btn.disabled=false; btn.textContent='💾 Guardar pedido'; return; }
+  var pago=getPago('pago-contenedor-ingreso',S._totalIngreso,modo);
+  var nombre=(el('cli-nombre').value||'').trim()||(el('cli-search').value||'').trim();
+  var telefono=(el('c-tel').value||'').trim();
+  var direccion=(el('c-dir').value||'').trim()||getDireccionCompleta();
+  var cliId=(el('c-id').value||'');
+  if(!cliId&&(nombre||telefono||direccion)){
+    try{ var n=await api('crearCliente',{nombre:nombre,telefono:telefono,direccion:direccion}); cliId=n.id; }
+    catch(e){ toast(e.message,'err'); btn.disabled=false; btn.textContent='💾 Guardar pedido'; return; }
+  } else if(cliId&&S.clienteSel){
+    var c=S.clienteSel;
+    if(nombre!==c.nombre||telefono!==c.telefono||direccion!==c.direccion)
+      await api('actualizarCliente',{id:cliId,nombre:nombre,telefono:telefono,direccion:direccion}).catch(function(){});
+  }
+  try {
+    var res=await api('crearPedido',{cliente_id:cliId||'',operador_id:'OP',items:items,monto_pagado:pago.efectivo+pago.tarjeta,medio_pago:pago.medio,cobros:pago.cobros,observaciones:(el('obs').value||''),es_domicilio:conDom,fecha_entrega_estimada:_fechaEstimada||''});
+    S.pedidoActual=Object.assign({},res,{telefono_cliente:telefono,nombre_cliente:nombre});
+    resetPedido(); resetCliente();
+    mostrarConfirmacion(res,nombre,telefono);
+  } catch(e){ toast(e.message,'err'); btn.disabled=false; btn.textContent='💾 Guardar pedido'; }
+}
+
+// ─── CONFIRMACION ─────────────────────────────
+function mostrarConfirmacion(res,nombre,telefono) {
+  var tel=res.telefono_cliente||telefono||'';
+  el('conf-ticket').textContent=res.numero_ticket; el('conf-ticket2').textContent=res.numero_ticket;
+  el('conf-resumen').textContent=(nombre||'Cliente')+' · $'+fmt(res.total)+(parseFloat(res.saldo)>0?' · Debe $'+fmt(res.saldo):' · Pagado ✅');
+  if(tel){
+    el('conf-tel').textContent=tel; el('edit-tel').value=tel;
+    el('edit-tel-wrap').style.display='none'; el('wa-btns').style.display='flex';
+    el('wa-section').style.display='block'; el('no-tel-section').style.display='none';
+  } else {
+    el('wa-section').style.display='none'; el('no-tel-section').style.display='block';
+  }
+  showScreen('screen-confirm');
+}
+function enviarWA() {
+  var tel=el('conf-tel').textContent, nombre=S.pedidoActual?(S.pedidoActual.nombre_cliente||''):'';
+  generarComprobante(S.pedidoActual||{},nombre,tel);
+  setTimeout(function(){ mostrarModalPostGuar('✅ Pedido registrado','¿Qué querés hacer ahora?','✅'); },1000);
+}
+function editarTel(){ el('edit-tel-wrap').style.display='block'; el('wa-btns').style.display='none'; }
+function cancelEditTel(){ el('edit-tel-wrap').style.display='none'; el('wa-btns').style.display='flex'; }
+async function confirmarTel(){
+  var tel=el('edit-tel').value.trim(), cliId=el('c-id').value;
+  if(cliId&&tel) await api('actualizarCliente',{id:cliId,telefono:tel}).catch(function(){});
+  el('conf-tel').textContent=tel; cancelEditTel(); enviarWA();
+}
+
+// ─── COMPROBANTE PDF ──────────────────────────
+function generarComprobante(res,nombre,telefono) {
+  var tel=String(telefono||'').replace(/\D/g,'');
+  var num=tel.startsWith('54')?tel:'54'+tel;
+  var ticket=res.numero_ticket||'—', total=parseFloat(res.total||0), pagado=parseFloat(res.pagado||0), saldo=parseFloat(res.saldo||0);
+  var items=res.items||[];
+  var fecha=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  var estadoPago=saldo>0?'<span style="color:#c00;font-weight:700">⚠️ Debe: $'+fmt(saldo)+'</span>':'<span style="color:#006600;font-weight:700">✅ Pagado completo</span>';
+  var itemsHtml=items.length>0?items.map(function(i){ return '<tr><td>'+(i.descripcion||'')+'</td><td style="text-align:center">'+(i.cantidad||1)+'</td><td style="text-align:right">$'+fmt(i.precio_unitario||0)+'</td><td style="text-align:right">$'+fmt(i.subtotal||0)+'</td></tr>'; }).join(''):'<tr><td colspan="4" style="color:#666">Sin detalle</td></tr>';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Comprobante '+ticket+'</title>'+
+    '<style>body{font-family:Arial,sans-serif;font-size:13px;color:#111;padding:24px;max-width:480px;margin:0 auto}.header{text-align:center;border-bottom:2px solid #111;padding-bottom:14px;margin-bottom:16px}.ticket-num{font-size:36px;font-weight:900;text-align:center;margin:16px 0 4px}.qr{text-align:center;margin:12px 0}.cliente{background:#f5f5f5;border-radius:6px;padding:10px 14px;margin-bottom:16px}table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12px}th{text-align:left;padding:6px 8px;border-bottom:2px solid #111;font-size:11px;text-transform:uppercase}td{padding:6px 8px;border-bottom:1px solid #eee}.total-row{display:flex;justify-content:space-between;padding:10px 0;font-weight:700;font-size:16px;border-top:2px solid #111}.estado{text-align:center;padding:12px;border-radius:6px;margin:14px 0;border:2px solid}.estado.pago{border-color:#006600;background:#f0fff0}.estado.debe{border-color:#c00;background:#fff0f0}.footer{text-align:center;font-size:11px;color:#999;margin-top:20px;border-top:1px solid #eee;padding-top:12px}</style></head><body>'+
+    '<div class="header"><div style="font-size:32px">🧺</div><div style="font-size:18px;font-weight:700">Lavandería</div><div style="font-size:12px;color:#666">'+fecha+'</div></div>'+
+    '<div class="ticket-num">'+ticket+'</div><div style="text-align:center;font-size:11px;color:#666;margin-bottom:8px">N° de ticket</div>'+
+    '<div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data='+encodeURIComponent(ticket)+'" style="width:140px;height:140px;border:4px solid #eee;border-radius:8px"><div style="font-size:10px;color:#999;margin-top:4px">Escaneá para identificar el pedido</div></div>'+
+    '<div class="cliente"><div style="font-size:11px;color:#666;text-transform:uppercase;margin-bottom:3px">Cliente</div><div style="font-weight:600">'+(nombre||'Sin nombre')+'</div>'+(telefono?'<div style="color:#666;font-size:12px">📱 '+telefono+'</div>':'')+'</div>'+
+    '<table><thead><tr><th>Servicio</th><th style="text-align:center">Cant.</th><th style="text-align:right">Precio</th><th style="text-align:right">Subtotal</th></tr></thead><tbody>'+itemsHtml+'</tbody></table>'+
+    '<div class="total-row"><span>TOTAL</span><span>$'+fmt(total)+'</span></div>'+
+    '<div class="estado '+(saldo>0?'debe':'pago')+'">'+estadoPago+'</div>'+
+    (saldo>0?'<div style="text-align:center;font-size:12px;color:#666;margin-bottom:12px">Se abona el saldo al retirar</div>':'')+
+    '<div class="footer">Guardá este comprobante<br>Te avisamos cuando esté listo 🧺</div></body></html>';
+  var win=window.open('','_blank'); win.document.write(html); win.document.close();
+  if(num.length>4) setTimeout(function(){ window.open('https://wa.me/'+num,'_blank'); },800);
+}
+
+async function enviarComprobanteExistente(id) {
+  try {
+    var p=await api('getPedido',{id:id}), c=p.cliente||{};
+    generarComprobante(p,c.nombre||c.direccion||p.cliente_nombre||'',c.telefono||p.cliente_telefono||'');
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+// ─── RETIRO ───────────────────────────────────
+function iniciarRetiro() {
+  S.estadoPagoFisico=null;
+  el('buscar-retiro').value='';
+  el('retiro-list').innerHTML='<div class="empty"><div class="empty-icon">🔍</div>Escribí para buscar</div>';
+  ['tf-numero','tf-cliente','tf-total','tf-efectivo','tf-tarjeta'].forEach(function(id){ var e=el(id); if(e) e.value=''; });
+  el('tf-debe-val').textContent='$0';
+  el('tf-pago-resumen').style.display='none';
+  el('tf-pago-wrap').style.display='none';
+  el('tf-btn-pago').classList.remove('sel');
+  el('tf-btn-pagado').classList.remove('sel');
+  setModoRetiro('sistema');
+  showScreen('screen-retiro');
+  setTimeout(function(){ el('buscar-retiro').focus(); },300);
+}
+
+function setModoRetiro(modo) {
+  var es=modo==='sistema';
+  el('retiro-modo-sistema').style.display=es?'block':'none';
+  el('retiro-modo-fisico').style.display=es?'none':'block';
+  var bs=el('btn-modo-sistema'),bf=el('btn-modo-fisico');
+  bs.style.background=es?'rgba(34,211,238,0.12)':'var(--surface2)'; bs.style.borderColor=es?'var(--accent)':'var(--border)'; bs.style.color=es?'var(--accent)':'var(--text)';
+  bf.style.background=es?'var(--surface2)':'rgba(74,222,128,0.12)'; bf.style.borderColor=es?'var(--border)':'var(--green)'; bf.style.color=es?'var(--text)':'var(--green)';
+}
+
+function setEstadoPagoFisico(modo) {
+  S.estadoPagoFisico=modo;
+  el('tf-btn-pago').classList.toggle('sel',modo==='pago');
+  el('tf-btn-pagado').classList.toggle('sel',modo==='pagado');
+  el('tf-pago-wrap').style.display=modo==='pago'?'block':'none';
+  if(modo==='pagado'){ el('tf-efectivo').value=''; el('tf-tarjeta').value=''; el('tf-debe-val').textContent='$0'; el('tf-pago-resumen').style.display='none'; }
+}
+
+function onTFPagoChange(){ calcPagoCombinado('tf-efectivo','tf-tarjeta','tf-debe-val','tf-pago-resumen',getVal('tf-total')); }
+
+async function buscarParaRetiro() {
+  var q=(el('buscar-retiro').value||'').trim(), list=el('retiro-list');
+  if(q.length<2){ list.innerHTML='<div class="empty"><div class="empty-icon">🔍</div>Escribí para buscar</div>'; return; }
+  list.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try {
+    var fil=await api('buscarPedidosRetiro',{q:q});
+    if(!fil.length){ list.innerHTML='<div class="empty">No encontrado en el sistema</div>'; return; }
+    list.innerHTML=fil.map(function(p){
+      var saldo=parseFloat(p.saldo||0), clsE={'Recibido':'pc-recibido','En proceso':'pc-proceso','Listo':'pc-listo'}[p.estado]||'';
+      return '<div class="pedido-card '+clsE+'" data-pedido-id="'+p.id+'">'+
+        '<div class="pc-top"><span class="pc-ticket">'+p.numero_ticket+'</span>'+badgeEstado(p.estado)+'</div>'+
+        '<div class="pc-cliente">'+(p.cliente_nombre||p.cliente_direccion||'Sin datos')+(p.cliente_telefono?' · '+p.cliente_telefono:'')+'</div>'+
+        '<div class="pc-bottom"><span class="pc-fecha">'+fmtFecha(p.fecha_ingreso)+'</span>'+
+        '<div style="text-align:right"><div class="pc-monto">$'+fmt(p.total)+'</div>'+(saldo>0?'<div class="pc-saldo">Debe $'+fmt(saldo)+'</div>':'<div style="font-size:12px;color:var(--green)">✅ Pagado</div>')+'</div></div></div>';
+    }).join('');
+    list.querySelectorAll('.pedido-card').forEach(function(e){ e.addEventListener('click', function(){ S._contextoDetalle='retiro'; abrirDetalle(e.dataset.pedidoId); }); });
+  } catch(e){ list.innerHTML='<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+async function registrarTicketFisico() {
+  var numero=(el('tf-numero').value||'').trim(), cliente=(el('tf-cliente').value||'').trim(), total=getVal('tf-total');
+  if(!numero){ toast('Ingresá el número de ticket','err'); return; }
+  if(!total){ toast('Ingresá el total del ticket','err'); return; }
+  if(!S.estadoPagoFisico){ toast('Indicá si estaba pago o paga ahora','err'); return; }
+  var monto_pagado=0,cobros=[],medio='';
+  if(S.estadoPagoFisico==='pagado'){ monto_pagado=total; medio='Pagado previo'; }
+  else {
+    var ef=getVal('tf-efectivo'),tar=getVal('tf-tarjeta');
+    if(ef<=0&&tar<=0){ toast('Ingresá cuánto paga','err'); return; }
+    monto_pagado=ef+tar;
+    if(ef>0) cobros.push({monto:ef,medio:'Efectivo'});
+    if(tar>0) cobros.push({monto:tar,medio:'Tarjeta/Transferencia'});
+    medio=cobros.length===2?'Combinado':cobros[0].medio;
+  }
+  var btn=el('btn-registrar-fisico'); btn.disabled=true; btn.textContent='Registrando...';
+  try {
+    var cliId='';
+    if(cliente){ var n=await api('crearCliente',{nombre:cliente,telefono:'',direccion:''}); cliId=n.id; }
+    await api('crearPedido',{cliente_id:cliId,operador_id:'OP',items:[{servicio_id:'FISICO',descripcion:'Servicio previo',cantidad:1,precio_unitario:0}],monto_pagado:monto_pagado,medio_pago:medio,cobros:cobros,total_override:total,estado_inicial:'Entregado',numero_ticket_override:'F-'+numero,observaciones:'Ticket físico pre-sistema'});
+    toast('Ticket registrado ✅','ok');
+    // Generar comprobante PDF del ticket físico
+    var resComp = {
+      numero_ticket: 'F-'+numero,
+      total: total,
+      pagado: monto_pagado,
+      saldo: Math.max(0, total - monto_pagado),
+      items: [{descripcion:'Servicio previo (ticket físico)', cantidad:1, precio_unitario:total, subtotal:total}],
+    };
+    if (confirm('¿Generás y enviás el comprobante al cliente?')) {
+      generarComprobante(resComp, cliente, '');
+    }
+    mostrarModalPostGuar('✅ Entrega registrada','¿Qué querés hacer ahora?','📦','retiro');
+  } catch(e){ toast(e.message,'err'); }
+  btn.disabled=false; btn.textContent='✅ Registrar entrega';
+}
+
+// ─── QR SCANNER ───────────────────────────────
+function abrirScannerQR() {
+  var modal=document.createElement('div');
+  modal.id='qr-modal';
+  modal.style.cssText='position:fixed;inset:0;background:#000;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML=
+    '<div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:16px">📷 Apuntá al QR del comprobante</div>'+
+    '<div style="position:relative;width:280px;height:280px">'+
+      '<video id="qr-video" style="width:280px;height:280px;object-fit:cover;border-radius:12px" playsinline muted autoplay></video>'+
+      '<canvas id="qr-canvas" style="display:none"></canvas>'+
+      '<div style="position:absolute;top:0;left:0;width:40px;height:40px;border-top:4px solid #22d3ee;border-left:4px solid #22d3ee;border-radius:8px 0 0 0"></div>'+
+      '<div style="position:absolute;top:0;right:0;width:40px;height:40px;border-top:4px solid #22d3ee;border-right:4px solid #22d3ee;border-radius:0 8px 0 0"></div>'+
+      '<div style="position:absolute;bottom:0;left:0;width:40px;height:40px;border-bottom:4px solid #22d3ee;border-left:4px solid #22d3ee;border-radius:0 0 0 8px"></div>'+
+      '<div style="position:absolute;bottom:0;right:0;width:40px;height:40px;border-bottom:4px solid #22d3ee;border-right:4px solid #22d3ee;border-radius:0 0 8px 0"></div>'+
+    '</div>'+
+    '<div style="color:#94a3b8;font-size:13px;margin-top:14px">Iniciando cámara...</div>'+
+    '<button id="qr-cerrar" style="margin-top:20px;padding:12px 28px;border-radius:10px;border:1px solid #334155;background:#1e293b;color:#f1f5f9;font-size:15px;cursor:pointer">✕ Cancelar</button>';
+  document.body.appendChild(modal);
+  var video=el('qr-video'), scanning=true, stream;
+  function cerrar(){ scanning=false; if(stream) stream.getTracks().forEach(function(t){t.stop();}); var m=el('qr-modal'); if(m) m.remove(); }
+  el('qr-cerrar').addEventListener('click', cerrar);
+  function procesarTicket(ticket){
+    if(!ticket) return; cerrar();
+    toast('🎯 Ticket: '+ticket,'ok');
+    setModoRetiro('sistema'); showScreen('screen-retiro');
+    var input=el('buscar-retiro'); if(input){ input.value=ticket; buscarParaRetiro(); }
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}})
+    .then(function(s){
+      stream=s; video.srcObject=s; video.play();
+      if('BarcodeDetector' in window){
+        var det=new BarcodeDetector({formats:['qr_code']});
+        function scan(){ if(!scanning) return; det.detect(video).then(function(codes){ if(codes&&codes.length>0){procesarTicket(codes[0].rawValue);return;} if(scanning) setTimeout(scan,300); }).catch(function(){ if(scanning) setTimeout(scan,300); }); }
+        video.addEventListener('playing', scan);
+      } else {
+        cerrar(); var t=prompt('Ingresá el N° de ticket manualmente:'); if(t) procesarTicket(t.trim());
+      }
+    })
+    .catch(function(err){ cerrar(); toast(err.name==='NotAllowedError'?'Permiso de cámara denegado':'No se pudo acceder a la cámara','err'); });
+}
+
+// ─── ÓRDENES ──────────────────────────────────
+async function cargarPedidos() {
+  var list=el('pedidos-list'); if(list) list.innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
+  try {
+    S.pedidos=await api('getPedidos');
+    var pend=S.pedidos.filter(function(p){ return p.estado!=='Entregado'; }).length;
+    var b=el('nbadge'); b.style.display=pend>0?'block':'none'; b.textContent=pend;
+    renderPedidos();
+  } catch(e){ if(list) list.innerHTML='<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+function renderPedidos() {
+  var list=el('pedidos-list'); if(!list) return;
+  var q=((el('buscar-ord').value)||'').trim().toLowerCase();
+  var hoyStr = new Date().toISOString().substring(0,10);
+  var todosActivos = S.pedidos.filter(function(p){ return p.estado!=='Entregado'; });
+
+  // Secciones de alertas
+  var vencidos = todosActivos.filter(function(p){
+    return p.fecha_entrega_estimada && String(p.fecha_entrega_estimada).substring(0,10) < hoyStr;
+  });
+  var vencenHoy = todosActivos.filter(function(p){
+    return p.fecha_entrega_estimada && String(p.fecha_entrega_estimada).substring(0,10) === hoyStr;
+  });
+
+  var alertasHtml = '';
+  if (vencidos.length > 0) {
+    alertasHtml += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🔴 Vencidos sin entregar ('+vencidos.length+')</div>'+
+      vencidos.map(function(p){ return renderCardPedido(p); }).join('')+'</div>';
+  }
+  if (vencenHoy.length > 0) {
+    alertasHtml += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🟡 Vencen hoy ('+vencenHoy.length+')</div>'+
+      vencenHoy.map(function(p){ return renderCardPedido(p); }).join('')+'</div>';
+  }
+  if (alertasHtml) {
+    alertasHtml += '<div style="height:1px;background:var(--border);margin:12px 0"></div>';
+  }
+
+  var ps=S.pedidos;
+  if(S.filtro!=='todos') ps=ps.filter(function(p){ return p.estado===S.filtro; });
+  if(q) ps=ps.filter(function(p){ return [p.numero_ticket,p.cliente_nombre,p.cliente_telefono,p.cliente_direccion].some(function(v){ return String(v||'').toLowerCase().indexOf(q)>=0; }); });
+  if(!ps.length && !alertasHtml){ list.innerHTML='<div class="empty"><div class="empty-icon">📋</div>Sin pedidos</div>'; return; }
+  list.innerHTML = alertasHtml + ps.map(function(p){
+    return renderCardPedido(p);
+  }).join('');
+  list.querySelectorAll('.pedido-card').forEach(function(e){ e.addEventListener('click', function(){ S._contextoDetalle='ordenes'; abrirDetalle(e.dataset.pedidoId); }); });
+}
+
+function renderCardPedido(p) {
+  var saldo=parseFloat(p.saldo||0), clsE={'Recibido':'pc-recibido','En proceso':'pc-proceso','Listo':'pc-listo','Entregado':'pc-entregado'}[p.estado]||'';
+  var hoyStr=new Date().toISOString().substring(0,10);
+  var fechaEst=p.fecha_entrega_estimada?String(p.fecha_entrega_estimada).substring(0,10):'';
+  var vencido = fechaEst && fechaEst < hoyStr;
+  var venceHoy= fechaEst && fechaEst === hoyStr;
+  var clsExtra = vencido?' pc-alerta':(venceHoy?' pc-proceso':'');
+  var fechaEstDisplay = fechaEst ? (' · 📅 '+fechaEst.split('-')[2]+'/'+fechaEst.split('-')[1]) : '';
+  return '<div class="pedido-card '+clsE+clsExtra+'" data-pedido-id="'+p.id+'">'+
+    '<div class="pc-top"><span class="pc-ticket">'+p.numero_ticket+'</span>'+badgeEstado(p.estado)+'</div>'+
+    '<div class="pc-cliente">'+(p.cliente_nombre||p.cliente_direccion||'Sin datos')+(p.cliente_telefono?' · '+p.cliente_telefono:'')+'</div>'+
+    '<div class="pc-bottom"><span class="pc-fecha">'+fmtFecha(p.fecha_ingreso)+fechaEstDisplay+'</span>'+
+    '<div style="text-align:right"><div class="pc-monto">$'+fmt(p.total)+'</div>'+(saldo>0?'<div class="pc-saldo">Debe $'+fmt(saldo)+'</div>':'')+'</div></div></div>';
+}
+
+function badgeEstado(e) {
+  var labels={'Recibido':'Recibido','En proceso':'En proceso','Listo':'🟢 A retirar','Entregado':'Entregado'};
+  var m={'Recibido':'b-blue','En proceso':'b-orange','Listo':'b-green','Entregado':'b-gray'};
+  return '<span class="badge '+(m[e]||'b-gray')+'">'+(labels[e]||e)+'</span>';
+}
+
+// ─── DETALLE PEDIDO ───────────────────────────
+async function abrirDetalle(id) {
+  var dc=el('drawer-content');
+  dc.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  abrirDrawer();
+  try {
+    var p=await api('getPedido',{id:id}), saldo=parseFloat(p.saldo||0);
+    var esRetiro = S._contextoDetalle === 'retiro';
+    var items=(p.items||[]).map(function(i){ return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:14px">'+i.descripcion+' × '+i.cantidad+'</span><span style="font-weight:600">$'+fmt(i.subtotal)+'</span></div>'; }).join('');
+
+    var html=
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'+
+        '<button class="btn btn-secondary btn-sm" id="btn-cerrar-drawer" style="font-size:13px;padding:8px 12px">← Volver</button>'+
+        '<span style="font-size:22px;font-weight:900">'+p.numero_ticket+'</span>'+badgeEstado(p.estado)+
+        '<button class="btn btn-secondary btn-sm" id="btn-comp-drawer" style="font-size:12px;padding:7px 10px">📄 PDF</button>'+
+      '</div>'+
+      '<div style="font-size:15px;color:var(--muted);margin-bottom:14px">'+
+        (p.cliente&&p.cliente.nombre?p.cliente.nombre:(p.cliente_nombre||''))+
+        (p.cliente&&p.cliente.direccion?'<br>'+p.cliente.direccion:(p.cliente_direccion?'<br>'+p.cliente_direccion:''))+
+        (p.cliente&&p.cliente.telefono?'<br>📱 '+p.cliente.telefono:'')+'</div>'+
+      (saldo>0?'<div class="alert alert-warn">⚠️ Saldo pendiente: $'+fmt(saldo)+'</div>':'')+
+      '<div class="card" style="margin-bottom:14px">'+items+
+        '<div style="display:flex;justify-content:space-between;padding-top:10px;margin-top:4px"><span style="font-weight:700">Total</span><span style="font-size:19px;font-weight:800">$'+fmt(p.total)+'</span></div></div>'+
+      (p.observaciones?'<div class="alert alert-info">📝 '+p.observaciones+'</div>':'')+
+      '<div style="display:flex;flex-direction:column;gap:10px" id="detalle-acciones">';
+
+    if (esRetiro) {
+      // ── CONTEXTO RETIRO: solo cobro + entrega ──
+      if (saldo>0) {
+        html += '<div id="cobro-pago-contenedor"></div>'+
+          '<button class="btn btn-green" id="btn-cobrar-y-entregar" data-pedido="'+p.id+'" data-saldo="'+saldo+'">💵 Cobrar y entregar</button>';
+      } else {
+        html += '<div class="alert alert-ok" style="margin-bottom:8px">✅ Pagado completo</div>'+
+          '<button class="btn btn-primary" id="btn-entregar" data-pedido="'+p.id+'">📦 Entregar ropa</button>';
+      }
+    } else {
+      // ── CONTEXTO ÓRDENES: ciclo completo de estados ──
+      var prox=proximoEstado(p.estado);
+      html += prox.map(function(a){ return '<button class="btn btn-'+a.color+'" data-estado="'+a.estado+'" data-pedido="'+p.id+'">'+a.label+'</button>'; }).join('');
+      if(saldo>0){
+        html+='<div class="divider"></div><div id="cobro-pago-contenedor"></div>'+
+          '<button class="btn btn-green" id="btn-cobrar" data-pedido="'+p.id+'" data-saldo="'+saldo+'">💵 Registrar cobro</button>';
+      } else html+='<div class="alert alert-ok">✅ Pagado completo</div>';
+    }
+
+    html+='</div>';
+    dc.innerHTML=html;
+
+    el('btn-cerrar-drawer').addEventListener('click', closeDrawer);
+    el('btn-comp-drawer').addEventListener('click', function(){ enviarComprobanteExistente(p.id); });
+
+    if (esRetiro) {
+      if (saldo>0) {
+        S._modoPagoCobro=null;
+        renderBotonesPago('cobro-pago-contenedor',saldo,function(modo){ S._modoPagoCobro=modo; });
+        var btnCE=el('btn-cobrar-y-entregar');
+        if(btnCE) btnCE.addEventListener('click', function(){ cobrarYEntregar(p, saldo); });
+      } else {
+        var btnE=el('btn-entregar');
+        if(btnE) btnE.addEventListener('click', function(){ entregar(p); });
+      }
+    } else {
+      dc.querySelectorAll('[data-estado]').forEach(function(btn){
+        btn.addEventListener('click', function(){ cambiarEstado(btn.dataset.pedido,btn.dataset.estado); });
+      });
+      if(saldo>0){
+        S._modoPagoCobro=null;
+        renderBotonesPago('cobro-pago-contenedor',saldo,function(modo){ S._modoPagoCobro=modo; });
+        var btnCobrar=el('btn-cobrar');
+        if(btnCobrar) btnCobrar.addEventListener('click', function(){ cobrar(btnCobrar.dataset.pedido,parseFloat(btnCobrar.dataset.saldo)); });
+      }
+    }
+  } catch(e){ dc.innerHTML='<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+// Entregar sin cobro pendiente
+async function entregar(p) {
+  try {
+    await api('cambiarEstadoPedido',{id:p.id,nuevo_estado:'Entregado',operador_id:'OP'});
+    toast('Entrega registrada ✅','ok');
+    closeDrawer();
+    // PDF actualizado con estado Entregado + Pagado
+    var pAct = Object.assign({}, p, {saldo:0, pagado:p.total});
+    var cliente = p.cliente||{};
+    if(confirm('¿Enviás comprobante de entrega al cliente?')){
+      generarComprobante(pAct, cliente.nombre||cliente.direccion||p.cliente_nombre||'', cliente.telefono||p.cliente_telefono||'');
+    }
+    cargarPedidos();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+// Cobrar y entregar en un solo paso
+async function cobrarYEntregar(p, saldoTotal) {
+  var modo=S._modoPagoCobro;
+  if(!modo){ toast('Seleccioná la forma de pago','err'); return; }
+  var pago=getPago('cobro-pago-contenedor',saldoTotal,modo);
+  var monto=pago.efectivo+pago.tarjeta;
+  if(monto<=0){ toast('Ingresá al menos un monto','err'); return; }
+  try {
+    // 1. Registrar cobro
+    await api('registrarCobro',{pedido_id:p.id,monto:monto,medio_pago:pago.medio,cobros:pago.cobros,operador_id:'OP'});
+    // 2. Marcar como Entregado
+    await api('cambiarEstadoPedido',{id:p.id,nuevo_estado:'Entregado',operador_id:'OP'});
+    toast('Cobrado y entregado ✅','ok');
+    closeDrawer();
+    // PDF actualizado con estado Pagado + Entregado
+    var pAct = Object.assign({}, p, {saldo:0, pagado:p.total});
+    var cliente = p.cliente||{};
+    if(confirm('¿Enviás comprobante de entrega al cliente?')){
+      generarComprobante(pAct, cliente.nombre||cliente.direccion||p.cliente_nombre||'', cliente.telefono||p.cliente_telefono||'');
+    }
+    cargarPedidos();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+function proximoEstado(e) {
+  return {'Recibido':[{estado:'En proceso',label:'⚙️ Pasar a En proceso',color:'orange'}],'En proceso':[{estado:'Listo',label:'✅ Marcar como Listo',color:'green'}],'Listo':[{estado:'Entregado',label:'📦 Registrar entrega',color:'primary'}],'Entregado':[]}[e]||[];
+}
+
+async function cambiarEstado(id,nuevo) {
+  try {
+    await api('cambiarEstadoPedido',{id:id,nuevo_estado:nuevo,operador_id:'OP'});
+    toast('Estado: '+nuevo,'ok');
+    if(nuevo==='Entregado'){
+      closeDrawer(); cargarPedidos();
+      if(confirm('¿Enviás el comprobante de entrega al cliente por WhatsApp?'))
+        setTimeout(function(){ enviarComprobanteExistente(id); },400);
+    } else { closeDrawer(); cargarPedidos(); }
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function cobrar(pedidoId,saldoTotal) {
+  var modo=S._modoPagoCobro;
+  if(!modo){ toast('Seleccioná la forma de pago','err'); return; }
+  var pago=getPago('cobro-pago-contenedor',saldoTotal,modo);
+  var monto=pago.efectivo+pago.tarjeta;
+  if(monto<=0){ toast('Ingresá al menos un monto','err'); return; }
+  try {
+    await api('registrarCobro',{pedido_id:pedidoId,monto:monto,medio_pago:pago.medio,cobros:pago.cobros,operador_id:'OP'});
+    toast('Cobro registrado ✅','ok'); closeDrawer(); cargarPedidos();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+// ─── CAJA ─────────────────────────────────────
+// ─── RETIROS A DOMICILIO ─────────────────────
+var ESTADOS_RETIRO = {
+  'Pendiente':     { label:'Pendiente',      badge:'b-blue',   desc:'Esperando confirmación' },
+  'Confirmado':    { label:'Confirmado',     badge:'b-orange', desc:'Visita agendada' },
+  'Retirado':      { label:'Retirado',       badge:'b-green',  desc:'Ropa en el local' },
+  'Pedido creado': { label:'Pedido creado',  badge:'b-gray',   desc:'En flujo normal' },
+};
+
+async function cargarRetiros() {
+  var list = el('retiros-list'); if(!list) return;
+  list.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try {
+    // Traer todos menos los que ya tienen pedido creado
+    var todos = await api('getRetirosDomicilio', {});
+    var retiros = todos.filter(function(r){ return r.estado !== 'Pedido creado'; });
+    if (!retiros.length) {
+      list.innerHTML='<div class="empty"><div class="empty-icon">🚚</div>Sin retiros pendientes</div>';
+      return;
+    }
+    var hoyStr = new Date().toISOString().substring(0,10);
+    list.innerHTML = retiros.map(function(r){
+      var fechaStr = String(r.fecha_retiro||'').substring(0,10);
+      var esHoy    = fechaStr === hoyStr;
+      var esPasado = fechaStr < hoyStr;
+      var estado   = ESTADOS_RETIRO[r.estado] || ESTADOS_RETIRO['Pendiente'];
+      var cls = esPasado ? 'pc-alerta' : (r.estado==='Retirado' ? 'pc-listo' : (esHoy ? 'pc-proceso' : 'pc-recibido'));
+      var precio = r.tipo_servicio==='completo' ? '$2.000' : '$1.000';
+      return '<div class="pedido-card '+cls+'" data-retiro-id="'+r.id+'">'+
+        '<div class="pc-top">'+
+          '<span class="pc-ticket" style="font-size:13px">📍 '+r.domicilio+'</span>'+
+          '<span class="badge '+estado.badge+'">'+estado.label+'</span>'+
+        '</div>'+
+        '<div class="pc-cliente">'+r.servicios+(r.telefono?' · 📱 '+r.telefono:'')+'</div>'+
+        '<div class="pc-bottom">'+
+          '<span class="pc-fecha">'+fechaStr.split('-').reverse().join('/')+(esHoy?' · Hoy':'')+(esPasado?' · Vencido':'')+' · '+r.rango_horario+'</span>'+
+          '<span class="pc-monto" style="font-size:13px">'+precio+'</span>'+
+        '</div></div>';
+    }).join('');
+    list.querySelectorAll('[data-retiro-id]').forEach(function(card){
+      card.addEventListener('click', function(){ abrirDetalleRetiro(card.dataset.retiroId, retiros); });
+    });
+  } catch(e){ list.innerHTML='<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+function abrirDetalleRetiro(id, retiros) {
+  var r = retiros.find(function(x){ return String(x.id)===String(id); });
+  if (!r) return;
+  var dc = el('drawer-content');
+  var precio = r.tipo_servicio==='completo' ? '$2.000 (retiro + entrega)' : '$1.000 (solo retiro)';
+  var fechaStr = String(r.fecha_retiro||'').substring(0,10).split('-').reverse().join('/');
+
+  var html =
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'+
+      '<button class="btn btn-secondary btn-sm" id="btn-cerrar-ret">← Volver</button>'+
+      '<span style="font-size:16px;font-weight:700">🚚 Retiro</span>'+
+      '<span class="badge '+(ESTADOS_RETIRO[r.estado]||ESTADOS_RETIRO['Pendiente']).badge+'">'+(ESTADOS_RETIRO[r.estado]||ESTADOS_RETIRO['Pendiente']).label+'</span>'+
+    '</div>'+
+    '<div class="card" style="margin-bottom:14px">'+
+      '<div class="cierre-row"><span class="cierre-label">📍 Domicilio</span><span style="font-weight:600;text-align:right">'+r.domicilio+'</span></div>'+
+      '<div class="cierre-row"><span class="cierre-label">📱 Teléfono</span><span style="font-weight:600">'+(r.telefono||'No informado')+'</span></div>'+
+      '<div class="cierre-row"><span class="cierre-label">🧺 Servicios</span><span style="text-align:right">'+(r.servicios||'No especificado')+'</span></div>'+
+      '<div class="cierre-row"><span class="cierre-label">📅 Fecha</span><span style="font-weight:600">'+fechaStr+'</span></div>'+
+      '<div class="cierre-row"><span class="cierre-label">🕐 Horario</span><span style="font-weight:600">'+r.rango_horario+'</span></div>'+
+      '<div class="cierre-row"><span class="cierre-label">🚚 Servicio</span><span style="color:var(--accent);font-weight:600">'+precio+'</span></div>'+
+      (r.notas?'<div style="margin-top:10px;padding:10px;background:var(--surface2);border-radius:8px;font-size:13px;color:var(--muted)">📝 '+r.notas+'</div>':'')+
+    '</div>'+
+    '<div style="display:flex;flex-direction:column;gap:10px" id="retiro-acciones">';
+
+  // Acciones según estado
+  if (r.estado === 'Pendiente') {
+    html +=
+      '<button class="btn btn-primary" id="btn-confirmar-visita">📅 Confirmar visita</button>'+
+      '<button class="btn btn-secondary btn-sm" id="btn-editar-retiro">✏️ Modificar fecha/horario</button>';
+  } else if (r.estado === 'Confirmado') {
+    html +=
+      '<button class="btn btn-green" id="btn-marcar-retirado">🚚 Marcar como retirado — ropa en el local</button>'+
+      '<button class="btn btn-secondary btn-sm" id="btn-editar-retiro">✏️ Modificar fecha/horario</button>';
+  } else if (r.estado === 'Retirado') {
+    html +=
+      '<div class="alert alert-info" style="margin-bottom:8px">La ropa llegó al local. Cargá los servicios reales y creá el pedido para continuar el flujo normal.</div>'+
+      '<button class="btn btn-primary" id="btn-crear-pedido-dom">✅ Cargar servicios y crear pedido</button>';
+  }
+
+  // WhatsApp si hay teléfono
+  if (r.telefono) {
+    var tel = String(r.telefono).replace(/\D/g,'');
+    var num = tel.startsWith('54') ? tel : '54'+tel;
+    var msg = encodeURIComponent('¡Hola! Recibimos tu solicitud de retiro para el '+fechaStr+' entre las '+r.rango_horario+'. Te confirmamos la visita. ¡Gracias! 🧺');
+    html += '<a href="https://wa.me/'+num+'?text='+msg+'" target="_blank" style="text-decoration:none"><button class="btn btn-secondary btn-sm" style="width:100%;background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.3);color:#25d366">💬 Enviar mensaje al cliente</button></a>';
+  }
+
+  html += '</div>';
+  dc.innerHTML = html;
+  abrirDrawer();
+
+  on('btn-cerrar-ret', 'click', closeDrawer);
+  on('btn-confirmar-visita', 'click', function(){
+    cambiarEstadoRetiroApp(r.id, 'Confirmado');
+  });
+  on('btn-marcar-retirado', 'click', function(){
+    cambiarEstadoRetiroApp(r.id, 'Retirado');
+  });
+  on('btn-crear-pedido-dom', 'click', function(){
+    crearPedidoDesdeRetiroApp(r);
+  });
+}
+
+async function cambiarEstadoRetiroApp(id, nuevoEstado) {
+  try {
+    await api('cambiarEstadoRetiro', {id:id, nuevo_estado:nuevoEstado});
+    toast('Estado: '+nuevoEstado+' ✅','ok');
+    closeDrawer(); cargarRetiros();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function crearPedidoDesdeRetiroApp(r) {
+  // Abrir pantalla de ingreso con el cliente pre-cargado y el retiro en contexto
+  S._retiroEnCurso = r;
+  // Buscar cliente por teléfono o dirección
+  var clientes = await api('buscarCliente', {q: r.telefono||r.domicilio});
+  var cli = clientes.length > 0 ? clientes[0] : null;
+  if (cli) {
+    S.clienteSel = cli;
+    el('c-id').value      = cli.id;
+    el('c-tel').value     = cli.telefono||'';
+    el('cli-nombre').value= cli.nombre||'';
+    el('c-dir').value     = cli.direccion||r.domicilio;
+    el('header-cli-nombre').textContent = cli.nombre||'Sin nombre';
+    el('header-cli-dir').textContent    = cli.direccion||r.domicilio;
+    el('header-cli-tel').textContent    = cli.telefono?'📱 '+cli.telefono:'Sin celular';
+  } else {
+    el('header-cli-nombre').textContent = 'Sin nombre';
+    el('header-cli-dir').textContent    = r.domicilio;
+    el('header-cli-tel').textContent    = r.telefono?'📱 '+r.telefono:'Sin celular';
+    el('c-dir').value = r.domicilio;
+    el('c-tel').value = r.telefono||'';
+  }
+  // Mostrar aviso del retiro en curso
+  var banner = el('deuda-banner');
+  if (banner) {
+    banner.textContent = '🚚 Pedido de domicilio — cargá los servicios reales de la ropa que llegó';
+    banner.style.display = 'block';
+  }
+  resetPedido();
+  closeDrawer();
+  showScreen('screen-ingreso');
+}
+
+async function cargarCaja() {
+  var c=el('caja-content'); c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try { renderCaja(await api('getCajaHoy')); }
+  catch(e){ c.innerHTML='<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+function renderCaja(d) {
+  var c=el('caja-content');
+  var fondo=d.fondo_anterior||0, efectivo=d.abierta?(d.efectivo||0):0, tarjeta=d.abierta?(d.tarjeta||0):0;
+  var total_egr=d.abierta?(d.total_egresos||0):0, fondo_esp=d.abierta?(d.fondo_esperado||fondo):fondo;
+  var conteo=d.abierta&&d.conteo?d.conteo:{lavados:0,tintorerias:0,acolchados:0,total_prendas:0};
+  var movimientos=d.abierta&&d.movimientos?d.movimientos:[], egresos=d.abierta&&d.egresos?d.egresos:[];
+  S._movimientosCaja=movimientos;
+  var html='';
+
+  html+='<div class="caja-seccion">'+
+    '<div class="caja-seccion-header">📊 Conteo del día <span style="color:var(--muted);font-size:11px;font-weight:400;text-transform:none;letter-spacing:0">'+conteo.total_prendas+' pedidos</span></div>'+
+    '<div class="caja-seccion-body"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'+
+    '<div class="conteo-item"><div class="conteo-num">'+conteo.lavados+'</div><div class="conteo-label">🧺 Lavados</div></div>'+
+    '<div class="conteo-item"><div class="conteo-num" style="color:var(--blue)">'+conteo.tintorerias+'</div><div class="conteo-label">🧥 Tint.</div></div>'+
+    '<div class="conteo-item"><div class="conteo-num" style="color:var(--orange)">'+conteo.acolchados+'</div><div class="conteo-label">🛏️ Acol.</div></div>'+
+    '</div></div></div>';
+
+  html+='<div class="caja-seccion"><div class="caja-seccion-header">💰 Resumen del día</div><div class="caja-seccion-body">'+
+    '<div class="cierre-row"><span class="cierre-label">Fondo de caja anterior</span><span class="cierre-val" style="color:var(--accent)">$'+fmt(fondo)+'</span></div>'+
+    '<div class="cierre-row"><span class="cierre-label">+ Ingresos efectivo</span><span class="cierre-val" style="color:var(--green)">+$'+fmt(efectivo)+'</span></div>'+
+    '<div class="cierre-row"><span class="cierre-label">+ Ingresos tarjeta</span><span class="cierre-val" style="color:var(--accent)">+$'+fmt(tarjeta)+'</span></div>'+
+    '<div class="cierre-row"><span class="cierre-label">= Total ingresos</span><span class="cierre-val">$'+fmt(efectivo+tarjeta)+'</span></div>'+
+    '<div class="cierre-row negativo"><span class="cierre-label">− Tarjeta (no queda en caja)</span><span class="cierre-val">−$'+fmt(tarjeta)+'</span></div>'+
+    '<div class="cierre-row negativo"><span class="cierre-label">− Egresos</span><span class="cierre-val">−$'+fmt(total_egr)+'</span></div>'+
+    '<div class="cierre-row subtotal"><span class="cierre-label">Efectivo esperado en caja</span><span class="cierre-val">$'+fmt(fondo_esp)+'</span></div>'+
+    '</div></div>';
+
+  var egresosHtml=egresos.length>0?egresos.map(function(e){ return '<div class="egreso-row"><span class="egreso-desc">'+e.descripcion+'</span><span class="egreso-monto">−$'+fmt(e.monto)+'</span></div>'; }).join(''):'<div style="font-size:13px;color:var(--muted)">Sin egresos</div>';
+  html+='<div class="caja-seccion"><div class="caja-seccion-header">📤 Egresos <span style="color:var(--red);font-weight:600;margin-left:8px">−$'+fmt(total_egr)+'</span></div>'+
+    '<div class="caja-seccion-body"><div id="egresos-lista">'+egresosHtml+'</div>'+
+    '<button class="btn-egreso" id="btn-nuevo-egreso">➕ Registrar egreso</button>'+
+    '<div class="egreso-form" id="egreso-form">'+
+    '<div class="input-group"><label class="input-label">Descripción</label><input class="input" id="egr-desc" type="text" placeholder="Ej: Gastos limpieza..."></div>'+
+    '<div class="input-group"><label class="input-label">Monto</label><input class="input" id="egr-monto" type="number" inputmode="decimal" placeholder="$0"></div>'+
+    '<div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" id="btn-guardar-egreso">Guardar</button><button class="btn btn-secondary btn-sm" id="btn-cancel-egreso">Cancelar</button></div>'+
+    '</div></div></div>';
+
+  var totEf=movimientos.reduce(function(a,m){ return a+(String(m.medio_pago||'').toLowerCase().indexOf('efectivo')>=0?parseFloat(m.monto||0):0); },0);
+  var totTar=movimientos.reduce(function(a,m){ var mp=String(m.medio_pago||'').toLowerCase(); return a+(!mp.includes('efectivo')&&mp!=='cuenta corriente'&&mp!=='pagado previo'?parseFloat(m.monto||0):0); },0);
+  html+='<div style="display:flex;gap:10px;margin-bottom:10px">'+
+    '<button class="btn-cerrar-caja" id="btn-cerrar-caja" style="flex:1">🔒 Cerrar caja del día</button>'+
+    '<button id="btn-imprimir-caja" style="padding:16px 18px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:15px;cursor:pointer;flex-shrink:0">🖨️</button>'+
+    '</div>';
+
+  html+='<div class="caja-seccion" id="btn-ver-movimientos" style="cursor:pointer">'+
+    '<div class="caja-seccion-header" style="justify-content:space-between"><span>📋 Movimientos del día</span><span style="color:var(--accent);font-size:12px">'+movimientos.length+' registros →</span></div>'+
+    '<div class="caja-seccion-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+    '<div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--green)">$'+fmt(totEf)+'</div><div style="font-size:11px;color:var(--muted)">Efectivo</div></div>'+
+    '<div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--accent)">$'+fmt(totTar)+'</div><div style="font-size:11px;color:var(--muted)">Tarjeta</div></div>'+
+    '</div></div></div>';
+
+  c.innerHTML=html;
+
+  el('btn-cerrar-caja').addEventListener('click', cerrarCaja);
+  el('btn-imprimir-caja').addEventListener('click', function(){ imprimirCaja(d); });
+  el('btn-ver-movimientos').addEventListener('click', function(){ abrirMovimientosCaja(S._movimientosCaja||[]); });
+  el('btn-nuevo-egreso').addEventListener('click', function(){ el('egreso-form').style.display='block'; this.style.display='none'; });
+  el('btn-cancel-egreso').addEventListener('click', function(){ el('egreso-form').style.display='none'; el('btn-nuevo-egreso').style.display='flex'; el('egr-desc').value=''; el('egr-monto').value=''; });
+  el('btn-guardar-egreso').addEventListener('click', guardarEgreso);
+}
+
+function abrirMovimientosCaja(movimientos) {
+  var dc=el('drawer-content');
+  var html='<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'+
+    '<button class="btn btn-secondary btn-sm" id="btn-cerrar-mov">← Volver</button>'+
+    '<span style="font-size:16px;font-weight:700">📋 Movimientos del día</span></div>';
+  if(!movimientos.length){
+    html+='<div class="empty">Sin movimientos</div>';
+  } else {
+    html+='<div style="overflow-x:auto"><table class="mov-table"><thead><tr><th>Ticket</th><th>Debe</th><th>Efectivo</th><th>Tarjeta</th><th>Hora</th></tr></thead><tbody>'+
+      movimientos.map(function(m){
+        var mp=String(m.medio_pago||'').toLowerCase();
+        var esEf=mp.indexOf('efectivo')>=0, esTar=!esEf&&mp!=='cuenta corriente'&&mp!=='pagado previo', esDebe=mp==='cuenta corriente';
+        // Mostrar fecha dd/MM HH:mm
+        var fechaStr = '—';
+        if (m.fecha && m.fecha !== '—') {
+          var partes = String(m.fecha).split(' ');
+          if (partes.length >= 2) {
+            var dp = partes[0].split('-');
+            fechaStr = (dp[2]||'')+'/'+(dp[1]||'')+' '+partes[1].substring(0,5);
+          } else {
+            fechaStr = String(m.fecha).substring(0,16);
+          }
+        }
+        return '<tr><td style="color:var(--text);font-weight:600">'+(m.numero_ticket||'—')+'</td>'+
+          '<td style="color:var(--orange)">'+(esDebe?'$'+fmt(m.monto):'—')+'</td>'+
+          '<td class="ef">'+(esEf?'$'+fmt(m.monto):'—')+'</td>'+
+          '<td class="tar">'+(esTar?'$'+fmt(m.monto):'—')+'</td>'+
+          '<td style="color:var(--muted);font-size:12px">'+fechaStr+'</td></tr>';
+      }).join('')+'</tbody></table></div>';
+    var totEf=movimientos.reduce(function(a,m){ return a+(String(m.medio_pago||'').toLowerCase().indexOf('efectivo')>=0?parseFloat(m.monto||0):0); },0);
+    var totTar=movimientos.reduce(function(a,m){ var mp=String(m.medio_pago||'').toLowerCase(); return a+(!mp.includes('efectivo')&&mp!=='cuenta corriente'&&mp!=='pagado previo'?parseFloat(m.monto||0):0); },0);
+    var totDebe=movimientos.reduce(function(a,m){ return a+(String(m.medio_pago||'').toLowerCase()==='cuenta corriente'?parseFloat(m.monto||0):0); },0);
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px">'+
+      '<div class="kpi"><div class="kpi-label">Efectivo</div><div class="kpi-val kv-green">$'+fmt(totEf)+'</div></div>'+
+      '<div class="kpi"><div class="kpi-label">Tarjeta</div><div class="kpi-val kv-accent">$'+fmt(totTar)+'</div></div>'+
+      '<div class="kpi"><div class="kpi-label">Cta. cte.</div><div class="kpi-val kv-orange">$'+fmt(totDebe)+'</div></div></div>';
+  }
+  dc.innerHTML=html;
+  abrirDrawer();
+  el('btn-cerrar-mov').addEventListener('click', closeDrawer);
+}
+
+async function abrirCaja(){ }
+async function guardarEgreso() {
+  var desc=(el('egr-desc').value||'').trim(), monto=getVal('egr-monto');
+  if(!desc){ toast('Ingresá una descripción','err'); return; }
+  if(monto<=0){ toast('Ingresá un monto válido','err'); return; }
+  try { await api('registrarEgreso',{descripcion:desc,monto:monto,operador_id:'OP'}); toast('Egreso registrado ✅','ok'); cargarCaja(); }
+  catch(e){ toast(e.message,'err'); }
+}
+async function cerrarCaja() {
+  if(!confirm('¿Confirmás el cierre de caja del día?')) return;
+  try {
+    var res=await api('cerrarCaja',{operador_id:'OP',fondo_anterior_editado:S._fondoEditado||0});
+    toast('Caja cerrada ✅ — Fondo siguiente: $'+fmt(res.fondo_siguiente),'ok'); cargarCaja();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+function imprimirCaja(d) {
+  var fecha=d.fecha||new Date().toLocaleDateString('es-AR');
+  var fondo=d.fondo_anterior||0,efectivo=d.efectivo||0,tarjeta=d.tarjeta||0;
+  var total_egr=d.total_egresos||0,fondo_esp=d.fondo_esperado||fondo;
+  var conteo=d.conteo||{lavados:0,tintorerias:0,acolchados:0,total_prendas:0};
+  var movs=d.movimientos||[],egresos=d.egresos||[];
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cierre de caja — '+fecha+'</title>'+
+    '<style>body{font-family:Arial,sans-serif;font-size:13px;color:#111;padding:24px;max-width:700px;margin:0 auto}h1{font-size:18px;font-weight:700;margin-bottom:4px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}.box{border:1px solid #ccc;border-radius:6px;padding:12px;text-align:center}.num{font-size:28px;font-weight:800;line-height:1}.lbl{font-size:11px;color:#666;margin-top:4px}h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #111;padding-bottom:4px;margin:20px 0 10px}.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee}.total-row{display:flex;justify-content:space-between;padding:10px 0;font-weight:700;font-size:15px;border-top:2px solid #111;margin-top:4px}.neg{color:#c00}table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;padding:7px 8px;border-bottom:2px solid #111;font-size:11px;text-transform:uppercase}td{padding:7px 8px;border-bottom:1px solid #eee}</style></head><body>'+
+    '<h1>🧺 Cierre de Caja — '+fecha+'</h1>'+
+    '<p style="color:#666;margin-bottom:16px">'+conteo.total_prendas+' pedidos ingresados</p>'+
+    '<h2>📊 Conteo del día</h2><div class="grid3">'+
+    '<div class="box"><div class="num">'+conteo.lavados+'</div><div class="lbl">🧺 Lavados</div></div>'+
+    '<div class="box"><div class="num">'+conteo.tintorerias+'</div><div class="lbl">🧥 Tintorerías</div></div>'+
+    '<div class="box"><div class="num">'+conteo.acolchados+'</div><div class="lbl">🛏️ Acolchados</div></div></div>'+
+    '<h2>💰 Resumen financiero</h2>'+
+    '<div class="row"><span>Fondo anterior</span><span>$'+fmt(fondo)+'</span></div>'+
+    '<div class="row"><span>+ Ingresos efectivo</span><span>$'+fmt(efectivo)+'</span></div>'+
+    '<div class="row"><span>+ Ingresos tarjeta</span><span>$'+fmt(tarjeta)+'</span></div>'+
+    '<div class="row"><span class="neg">− Tarjeta</span><span class="neg">−$'+fmt(tarjeta)+'</span></div>'+
+    '<div class="row"><span class="neg">− Egresos</span><span class="neg">−$'+fmt(total_egr)+'</span></div>'+
+    '<div class="total-row"><span>Efectivo esperado</span><span>$'+fmt(fondo_esp)+'</span></div>'+
+    (egresos.length>0?'<h2>📤 Egresos</h2><table><thead><tr><th>Concepto</th><th style="text-align:right">Monto</th></tr></thead><tbody>'+egresos.map(function(e){return '<tr><td>'+e.descripcion+'</td><td style="text-align:right" class="neg">−$'+fmt(e.monto)+'</td></tr>';}).join('')+'</tbody></table>':'')+
+    '<h2>📋 Movimientos del día</h2><table><thead><tr><th>Ticket</th><th>Debe</th><th style="text-align:right">Efectivo</th><th style="text-align:right">Tarjeta</th><th>Fecha</th></tr></thead><tbody>'+
+    (movs.length>0?movs.map(function(m){
+      var mp=String(m.medio_pago||'').toLowerCase(),esEf=mp.indexOf('efectivo')>=0,esTar=!esEf&&mp!=='cuenta corriente'&&mp!=='pagado previo',esDebe=mp==='cuenta corriente';
+      var partes=String(m.fecha||'').split(' '), dp=(partes[0]||'').split('-');
+      var fechaStr=dp[2]?dp[2]+'/'+(dp[1]||'')+' '+(partes[1]||'').substring(0,5):'—';
+      return '<tr><td><strong>'+(m.numero_ticket||'—')+'</strong></td><td style="color:#c00">'+(esDebe?'$'+fmt(m.monto):'—')+'</td><td style="text-align:right">'+(esEf?'$'+fmt(m.monto):'—')+'</td><td style="text-align:right">'+(esTar?'$'+fmt(m.monto):'—')+'</td><td>'+fechaStr+'</td></tr>';
+    }).join(''):'<tr><td colspan="5" style="color:#999;text-align:center;padding:10px">Sin movimientos</td></tr>')+
+    '</tbody></table></body></html>';
+  var win=window.open('','_blank'); win.document.write(html); win.document.close();
+  setTimeout(function(){ win.print(); },400);
+}
+
+// ─── CLIENTES ─────────────────────────────────
+async function buscarCliTab() {
+  var q=(el('buscar-cli').value||'').trim(), list=el('cli-list');
+  if(q.length<2){ list.innerHTML='<div class="empty"><div class="empty-icon">👤</div>Buscá un cliente</div>'; return; }
+  try {
+    var res=await api('buscarCliente',{q:q});
+    if(!res.length){ list.innerHTML='<div class="empty">Sin resultados</div>'; return; }
+    list.innerHTML=res.map(function(c){
+      return '<div class="card" style="cursor:pointer" data-cli-id="'+c.id+'">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+        '<div><div style="font-weight:700">'+(c.nombre||'(sin nombre)')+'</div>'+
+        '<div style="font-size:13px;color:var(--muted)">'+(c.direccion||'')+(c.telefono?' · '+c.telefono:'')+'</div></div>'+
+        (parseFloat(c.saldo_deuda||0)>0?'<span class="badge b-red">Debe $'+fmt(c.saldo_deuda)+'</span>':'<span class="badge b-green">Al día</span>')+
+        '</div></div>';
+    }).join('');
+    list.querySelectorAll('[data-cli-id]').forEach(function(e){ e.addEventListener('click', function(){ verCCC(e.dataset.cliId); }); });
+  } catch{}
+}
+
+async function verCCC(id) {
+  var list=el('cli-list'); list.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try {
+    var d=await api('getCuentaCorriente',{cliente_id:id}), c=d.cliente;
+    list.innerHTML='<button class="btn btn-secondary btn-sm" style="width:auto;margin-bottom:14px" id="btn-volver-cli">← Volver</button>'+
+      '<div class="card"><div style="font-size:18px;font-weight:700">'+(c.nombre||'(sin nombre)')+'</div>'+
+      '<div style="font-size:13px;color:var(--muted);margin-top:4px">'+(c.direccion||'')+(c.telefono?'<br>📱 '+c.telefono:'')+'</div>'+
+      '<div class="divider"></div>'+
+      '<div class="kpi-grid" style="margin:0">'+
+      '<div class="kpi"><div class="kpi-label">Pedidos</div><div class="kpi-val kv-accent">'+d.pedidos.length+'</div></div>'+
+      '<div class="kpi"><div class="kpi-label">Deuda</div><div class="kpi-val '+(d.saldo_deuda>0?'kv-orange':'kv-green')+'">$'+fmt(d.saldo_deuda)+'</div></div>'+
+      '</div></div>'+
+      '<div style="font-weight:600;margin-bottom:8px">Últimos pedidos</div>'+
+      d.pedidos.slice(0,8).map(function(p){
+        var clsE={'Recibido':'pc-recibido','En proceso':'pc-proceso','Listo':'pc-listo','Entregado':'pc-entregado'}[p.estado]||'';
+        return '<div class="pedido-card '+clsE+'"><div class="pc-top"><span class="pc-ticket">'+p.numero_ticket+'</span>'+badgeEstado(p.estado)+'</div><div class="pc-bottom"><span class="pc-fecha">'+fmtFecha(p.fecha_ingreso)+'</span><span class="pc-monto">$'+fmt(p.total)+'</span></div></div>';
+      }).join('');
+    el('btn-volver-cli').addEventListener('click', function(){ el('buscar-cli').value=''; buscarCliTab(); });
+  } catch{ list.innerHTML='<div class="empty">Error</div>'; }
+}
+
+// ─── DRAWER ───────────────────────────────────
+function abrirDrawer() { el('overlay').classList.add('open'); el('drawer').classList.add('open'); }
+function closeDrawer() { el('overlay').classList.remove('open'); el('drawer').classList.remove('open'); }
+</script>
+
+</body>
+</html>
