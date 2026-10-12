@@ -253,32 +253,30 @@ select.input{-webkit-appearance:none;appearance:none}
 </head>
 <body>
 <!-- PIN DE ACCESO -->
-<div id="pin-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;touch-action:manipulation">
-  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:360px;padding:32px">
-    <div style="font-size:48px;margin-bottom:16px">🧺</div>
-    <div style="font-size:22px;font-weight:800;margin-bottom:8px">Lavandería</div>
-    <div style="font-size:14px;color:var(--muted);margin-bottom:32px;text-align:center">Ingresá tu PIN para continuar</div>
-    <div style="display:flex;gap:12px;margin-bottom:24px">
-      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d1"></div>
-      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d2"></div>
-      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d3"></div>
-      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d4"></div>
-    </div>
-    <div id="pin-error" style="color:var(--red);font-size:13px;margin-bottom:16px;height:20px;text-align:center"></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:280px">
-      <button class="pin-btn" type="button">1</button>
-      <button class="pin-btn" type="button">2</button>
-      <button class="pin-btn" type="button">3</button>
-      <button class="pin-btn" type="button">4</button>
-      <button class="pin-btn" type="button">5</button>
-      <button class="pin-btn" type="button">6</button>
-      <button class="pin-btn" type="button">7</button>
-      <button class="pin-btn" type="button">8</button>
-      <button class="pin-btn" type="button">9</button>
-      <div></div>
-      <button class="pin-btn" type="button">0</button>
-      <button class="pin-btn pin-del" type="button">⌫</button>
-    </div>
+<div id="pin-screen" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;touch-action:manipulation">
+  <div style="font-size:48px;margin-bottom:16px">🧺</div>
+  <div style="font-size:22px;font-weight:800;margin-bottom:8px">Lavandería</div>
+  <div style="font-size:14px;color:var(--muted);margin-bottom:32px">Ingresá tu PIN para continuar</div>
+  <div style="display:flex;gap:12px;margin-bottom:24px">
+    <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d1"></div>
+    <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d2"></div>
+    <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d3"></div>
+    <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d4"></div>
+  </div>
+  <div id="pin-error" style="color:var(--red);font-size:13px;margin-bottom:16px;height:20px;text-align:center"></div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:240px">
+    <button class="pin-btn" type="button">1</button>
+    <button class="pin-btn" type="button">2</button>
+    <button class="pin-btn" type="button">3</button>
+    <button class="pin-btn" type="button">4</button>
+    <button class="pin-btn" type="button">5</button>
+    <button class="pin-btn" type="button">6</button>
+    <button class="pin-btn" type="button">7</button>
+    <button class="pin-btn" type="button">8</button>
+    <button class="pin-btn" type="button">9</button>
+    <div></div>
+    <button class="pin-btn" type="button">0</button>
+    <button class="pin-btn pin-del" type="button">⌫</button>
   </div>
 </div>
 
@@ -295,20 +293,18 @@ select.input{-webkit-appearance:none;appearance:none}
 
     <!-- HOME -->
     <div class="screen active" id="screen-home" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px 24px;padding-bottom:calc(32px + var(--sb))">
-      <div style="width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;gap:20px">
-        <div class="home-logo">🧺</div>
-        <div class="home-title">¿Qué operación?</div>
-        <button class="home-btn ingreso" id="btn-home-ingreso">
-          <span class="home-btn-icon">📥</span>
-          <span class="home-btn-label">Ingreso de pedido</span>
-          <span class="home-btn-sub">El cliente deja ropa</span>
-        </button>
-        <button class="home-btn retiro" id="btn-home-retiro">
-          <span class="home-btn-icon">📦</span>
-          <span class="home-btn-label">Retiro de pedido</span>
-          <span class="home-btn-sub">El cliente viene a buscar</span>
-        </button>
-      </div>
+      <div class="home-logo">🧺</div>
+      <div class="home-title">¿Qué operación?</div>
+      <button class="home-btn ingreso" id="btn-home-ingreso">
+        <span class="home-btn-icon">📥</span>
+        <span class="home-btn-label">Ingreso de pedido</span>
+        <span class="home-btn-sub">El cliente deja ropa</span>
+      </button>
+      <button class="home-btn retiro" id="btn-home-retiro">
+        <span class="home-btn-icon">📦</span>
+        <span class="home-btn-label">Retiro de pedido</span>
+        <span class="home-btn-sub">El cliente viene a buscar</span>
+      </button>
     </div>
 
     <!-- INGRESO PASO 1: CLIENTE -->
@@ -627,7 +623,7 @@ select.input{-webkit-appearance:none;appearance:none}
 
 <!-- MODAL POST-GUARDADO -->
 <div id="modal-postguar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:400;align-items:center;justify-content:center;padding:24px">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:420px;text-align:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:360px;text-align:center">
     <div style="font-size:48px;margin-bottom:12px" id="pg-icon">✅</div>
     <div style="font-size:18px;font-weight:700;margin-bottom:6px" id="pg-titulo">Pedido guardado</div>
     <div style="font-size:14px;color:var(--muted);margin-bottom:24px" id="pg-sub">¿Qué querés hacer ahora?</div>
@@ -639,6 +635,36 @@ select.input{-webkit-appearance:none;appearance:none}
 </div>
 
 <script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbwkr8BTocM3QREaCW_47gRLkpuKayxjPPjCigot8EXx4Ags7oXulCMpO7VxL4vt6dE-tA/exec';
+
+async function api(action, params = {}) {
+  const url = new URL(API_URL);
+  url.searchParams.set('action', action);
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null)
+      url.searchParams.set(k, typeof v === 'object' ? JSON.stringify(v) : v);
+  });
+  const resp = await fetch(url.toString(), { redirect: 'follow' });
+  const data = await resp.json();
+  if (!data.ok) throw new Error(data.error || 'Error');
+  return data.data;
+}
+
+async function apiPost(action, body = {}) {
+  const url = new URL(API_URL);
+  url.searchParams.set('action', action);
+  const resp = await fetch(url.toString(), {
+    method: 'POST', redirect: 'follow',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, ...body })
+  });
+  const data = await resp.json();
+  if (!data.ok) throw new Error(data.error || 'Error');
+  return data.data;
+}
+</script>
+<script>
+
 // ─── ESTADO ───────────────────────────────────
 var S = {
   servicios:[], pedidos:[], filtro:'todos',
@@ -664,7 +690,7 @@ var GRUPOS = [
 var CALLES = ["La Pampa","O'Higgins","Arcos","José Hernández","Sucre","Echeverría","3 de Febrero","11 de Septiembre"];
 
 // ─── API ──────────────────────────────────────
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzpndKN6kXqDbFml1hm74bhXLE7kteqqby8-FBQAkZnC4B5A1y05Et7klrnhtoDDXzWQA/exec';
+var APPS_SCRIPT_URL = 'REEMPLAZAR_CON_URL';
 
 async function api(action, params) {
   var url = APPS_SCRIPT_URL + '?action=' + encodeURIComponent(action);
@@ -2054,7 +2080,7 @@ async function verCCC(id) {
 // ─── DRAWER ───────────────────────────────────
 function abrirDrawer() { el('overlay').classList.add('open'); el('drawer').classList.add('open'); }
 function closeDrawer() { el('overlay').classList.remove('open'); el('drawer').classList.remove('open'); }
-</script>
 
+</script>
 </body>
 </html>
