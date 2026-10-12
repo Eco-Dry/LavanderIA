@@ -292,19 +292,21 @@ select.input{-webkit-appearance:none;appearance:none}
   <div class="screens">
 
     <!-- HOME -->
-    <div class="screen active" id="screen-home" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px 24px;padding-bottom:calc(32px + var(--sb))">
-      <div class="home-logo">🧺</div>
-      <div class="home-title">¿Qué operación?</div>
-      <button class="home-btn ingreso" id="btn-home-ingreso">
-        <span class="home-btn-icon">📥</span>
-        <span class="home-btn-label">Ingreso de pedido</span>
-        <span class="home-btn-sub">El cliente deja ropa</span>
-      </button>
-      <button class="home-btn retiro" id="btn-home-retiro">
-        <span class="home-btn-icon">📦</span>
-        <span class="home-btn-label">Retiro de pedido</span>
-        <span class="home-btn-sub">El cliente viene a buscar</span>
-      </button>
+    <div class="screen active" id="screen-home" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;padding-bottom:calc(32px + var(--sb))">
+      <div style="width:100%;max-width:480px;display:flex;flex-direction:column;gap:20px;align-items:center">
+        <div class="home-logo">🧺</div>
+        <div class="home-title">¿Qué operación?</div>
+        <button class="home-btn ingreso" id="btn-home-ingreso">
+          <span class="home-btn-icon">📥</span>
+          <span class="home-btn-label">Ingreso de pedido</span>
+          <span class="home-btn-sub">El cliente deja ropa</span>
+        </button>
+        <button class="home-btn retiro" id="btn-home-retiro">
+          <span class="home-btn-icon">📦</span>
+          <span class="home-btn-label">Retiro de pedido</span>
+          <span class="home-btn-sub">El cliente viene a buscar</span>
+        </button>
+      </div>
     </div>
 
     <!-- INGRESO PASO 1: CLIENTE -->
