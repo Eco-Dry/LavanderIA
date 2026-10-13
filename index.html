@@ -254,29 +254,31 @@ select.input{-webkit-appearance:none;appearance:none}
 <body>
 <!-- PIN DE ACCESO -->
 <div id="pin-screen" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;touch-action:manipulation">
-  <div style="font-size:48px;margin-bottom:16px">🧺</div>
-  <div style="font-size:22px;font-weight:800;margin-bottom:8px">Lavandería</div>
-  <div style="font-size:14px;color:var(--muted);margin-bottom:32px">Ingresá tu PIN para continuar</div>
-  <div style="display:flex;gap:12px;margin-bottom:24px">
-    <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d1"></div>
-    <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d2"></div>
-    <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d3"></div>
-    <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d4"></div>
-  </div>
-  <div id="pin-error" style="color:var(--red);font-size:13px;margin-bottom:16px;height:20px;text-align:center"></div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:240px">
-    <button class="pin-btn" type="button">1</button>
-    <button class="pin-btn" type="button">2</button>
-    <button class="pin-btn" type="button">3</button>
-    <button class="pin-btn" type="button">4</button>
-    <button class="pin-btn" type="button">5</button>
-    <button class="pin-btn" type="button">6</button>
-    <button class="pin-btn" type="button">7</button>
-    <button class="pin-btn" type="button">8</button>
-    <button class="pin-btn" type="button">9</button>
-    <div></div>
-    <button class="pin-btn" type="button">0</button>
-    <button class="pin-btn pin-del" type="button">⌫</button>
+  <div style="width:100%;max-width:320px;display:flex;flex-direction:column;align-items:center">
+    <div style="font-size:48px;margin-bottom:16px">🧺</div>
+    <div style="font-size:22px;font-weight:800;margin-bottom:8px">Lavandería</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:32px">Ingresá tu PIN para continuar</div>
+    <div style="display:flex;gap:12px;margin-bottom:24px">
+      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d1"></div>
+      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d2"></div>
+      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d3"></div>
+      <div style="width:16px;height:16px;border-radius:50%;background:var(--border);transition:background 0.2s" id="pin-d4"></div>
+    </div>
+    <div id="pin-error" style="color:var(--red);font-size:13px;margin-bottom:16px;height:20px;text-align:center;width:100%"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,72px);gap:12px">
+      <button class="pin-btn" type="button">1</button>
+      <button class="pin-btn" type="button">2</button>
+      <button class="pin-btn" type="button">3</button>
+      <button class="pin-btn" type="button">4</button>
+      <button class="pin-btn" type="button">5</button>
+      <button class="pin-btn" type="button">6</button>
+      <button class="pin-btn" type="button">7</button>
+      <button class="pin-btn" type="button">8</button>
+      <button class="pin-btn" type="button">9</button>
+      <div></div>
+      <button class="pin-btn" type="button">0</button>
+      <button class="pin-btn pin-del" type="button">⌫</button>
+    </div>
   </div>
 </div>
 
